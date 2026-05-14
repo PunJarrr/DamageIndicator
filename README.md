@@ -32,7 +32,7 @@ A lightweight Minecraft plugin that displays floating damage and heal indicators
 ## ⚙️ Configuration
 
 - All settings are configurable in `config.yml`.
-- All messages are fully customizable in translation files using MiniMessage format.
+- All messages are fully customizable in translation files using [MiniMessage](https://docs.papermc.io/adventure/minimessage/format/#standard-tags) format.
 
 ```yaml
 ############################
