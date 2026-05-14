@@ -1,0 +1,20 @@
+name: DamageIndicator
+version: '${version}'
+
+main: dev.punjarrr.damageIndicator.DamageIndicator
+api-version: '1.21.3'
+load: POSTWORLD
+
+authors: [ PunJarrr ]
+
+commands:
+  damageindicator:
+    description: DamageIndicator plugin command.
+    usage: /damageindicator [reload]
+    aliases: [ di ]
+    permission: damageindicator.reload
+
+permissions:
+  damageindicator.reload:
+    description: Allows reloading the DamageIndicator configuration.
+    default: op
