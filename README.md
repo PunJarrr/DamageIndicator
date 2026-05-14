@@ -9,7 +9,7 @@
   <a href="https://www.spigotmc.org/resources/damage-indicator-1-21-3-26-1-2.135211/">
     <img src="https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy-minimal/available/spigot_vector.svg" alt="spigot">
   </a>
-  <a href="https://hangar.papermc.io/PunJarrr/GainExpDisplay/">
+  <a href="https://hangar.papermc.io/PunJarrr/DamageIndicator_/">
     <img src="https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy-minimal/available/hangar_vector.svg" alt="hangar">
   </a>
   <a href="https://github.com/PunJarrr/GainExpDisplay/">
