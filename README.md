@@ -12,9 +12,6 @@
   <a href="https://hangar.papermc.io/PunJarrr/DamageIndicator_/">
     <img src="https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy-minimal/available/hangar_vector.svg" alt="hangar">
   </a>
-  <a href="https://github.com/PunJarrr/GainExpDisplay/">
-    <img src="https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy-minimal/available/github_vector.svg" alt="github">
-  </a>
 </p>
   
 A lightweight Minecraft plugin that displays floating damage and heal indicators above entities when they take damage or recover health.
@@ -35,10 +32,6 @@ A lightweight Minecraft plugin that displays floating damage and heal indicators
 - All messages are fully customizable in translation files using [MiniMessage](https://docs.papermc.io/adventure/minimessage/format/#standard-tags) format.
 
 ```yaml
-############################
-#     Damage Indicator     #
-############################
-
 # Plugin settings
 settings:
   # The language file to use from the /lang folder (e.g. en_US).
@@ -82,10 +75,6 @@ settings:
   # The list of entities that are blacklisted from showing damage or heal indicators.
   blacklisted-entities:
     - PLAYER
-
-# Leave this option alone unless you know what you're doing.
-# Changing this value may cause unexpected issues!
-config-version: 1.0.0
 ```
 
 ## 📚 Commands & Permissions
