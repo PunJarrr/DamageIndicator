@@ -7,31 +7,35 @@ public class TextFormatter {
 
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
+    static final String DEFAULT_DAMAGE = "<red>-{damage}❤<aqua>[{current}❤]";
+    static final String DEFAULT_HEAL = "<green>+{heal}❤<aqua>[{current}❤]";
+
     public static Component formatDamage(double damage, double current, double max) {
         return format(
-                Config.getString("settings.text-format.damage", "<red>-{damage}❤<aqua>[{current}❤]"),
+                Config.getString("settings.text-format.damage", DEFAULT_DAMAGE),
+                Config.getString("settings.number-format", "int"),
                 damage, 0, current, max
         );
     }
 
     public static Component formatHeal(double heal, double current, double max) {
         return format(
-                Config.getString("settings.text-format.heal", "<green>+{heal}❤<aqua>[{current}❤]"),
+                Config.getString("settings.text-format.heal", DEFAULT_HEAL),
+                Config.getString("settings.number-format", "int"),
                 0, heal, current, max
         );
     }
 
-    private static Component format(String raw, double damage, double heal, double current, double max) {
+    static Component format(String raw, String numberFormat, double damage, double heal, double current, double max) {
         String text = raw
-                .replace("{damage}", formatNumber(damage))
-                .replace("{heal}", formatNumber(heal))
-                .replace("{current}", formatNumber(current))
-                .replace("{max}", formatNumber(max));
+                .replace("{damage}", formatNumber(damage, numberFormat))
+                .replace("{heal}", formatNumber(heal, numberFormat))
+                .replace("{current}", formatNumber(current, numberFormat))
+                .replace("{max}", formatNumber(max, numberFormat));
         return MINI_MESSAGE.deserialize(text);
     }
 
-    private static String formatNumber(double value) {
-        String format = Config.getString("settings.number-format", "int");
+    static String formatNumber(double value, String format) {
         if ("double".equalsIgnoreCase(format)) {
             return String.valueOf(value);
         }

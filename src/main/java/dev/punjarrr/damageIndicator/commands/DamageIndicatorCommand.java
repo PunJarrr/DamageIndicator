@@ -1,7 +1,9 @@
 package dev.punjarrr.damageIndicator.commands;
 
 import dev.punjarrr.damageIndicator.DamageIndicator;
+import dev.punjarrr.damageIndicator.utils.BlacklistedEntities;
 import dev.punjarrr.damageIndicator.utils.Language;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -17,24 +19,29 @@ public class DamageIndicatorCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("damageindicator.reload")) {
-            sender.sendMessage(Language.getComponent("command.no-permission"));
+            send(sender, Language.getComponent("command.no-permission"));
             return true;
         }
 
         if (args.length == 0 || !args[0].equalsIgnoreCase("reload")) {
-            sender.sendMessage(Language.getComponent("command.unknown-subcommand", Map.of("{command}", label)));
+            send(sender, Language.getComponent("command.unknown-subcommand", Map.of("{command}", label)));
             return true;
         }
 
         try {
             DamageIndicator.getInstance().reloadConfig();
             Language.reload();
-            sender.sendMessage(Language.getComponent("command.reload.success"));
+            BlacklistedEntities.reload();
+            send(sender, Language.getComponent("command.reload.success"));
         } catch (Exception e) {
-            sender.sendMessage(Language.getComponent("command.reload.failed", Map.of("{error}", e.getMessage())));
+            send(sender, Language.getComponent("command.reload.failed", Map.of("{error}", String.valueOf(e.getMessage()))));
         }
 
         return true;
+    }
+
+    private static void send(CommandSender to, Component message) {
+        DamageIndicator.getInstance().textBridge().sendMessage(to, message);
     }
 
     @Override

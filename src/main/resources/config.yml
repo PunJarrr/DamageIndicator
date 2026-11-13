@@ -4,7 +4,7 @@
 
 # Plugin settings
 settings:
-  # The language file to use from the /lang folder (e.g. en_US).
+  # The language file to use from the translations folder (e.g. en_US).
   language: en_US
 
   # Customize the damage and heal text displayed above mobs when they are damaged or healed.

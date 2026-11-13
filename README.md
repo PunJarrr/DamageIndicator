@@ -1,86 +1,114 @@
-# <p align="center">DamageIndicator</p>
+<div align="center">
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy/supported/paper_vector.svg" alt="paper">
-  <img src="https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy/supported/purpur_vector.svg" alt="purpur">
-  <a href="https://modrinth.com/plugin/gainexpdisplay/">
-    <img src="https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy-minimal/available/modrinth_vector.svg" alt="modrinth">
-  </a>
-  <a href="https://www.spigotmc.org/resources/damage-indicator-1-21-3-26-1-2.135211/">
-    <img src="https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy-minimal/available/spigot_vector.svg" alt="spigot">
-  </a>
-  <a href="https://hangar.papermc.io/PunJarrr/DamageIndicator_/">
-    <img src="https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy-minimal/available/hangar_vector.svg" alt="hangar">
-  </a>
-</p>
-  
-A lightweight Minecraft plugin that displays floating damage and heal indicators above entities when they take damage or recover health.
+<img src="https://cdn.modrinth.com/data/7hpegiHp/341758c878838872789376d2cae421ba1ccbd2ff_96.webp" alt="DamageIndicator icon" width="96">
 
-## ✨ Features
+# DamageIndicator
 
-- Shows damage dealt as floating text above the entity's head
-- Shows healing received with a distinct color
-- Fully customizable text format using MiniMessage
-- Configurable number format — integer or precise decimal
-- Configurable display duration, scale, and billboard mode
-- Blacklist specific entity types from showing indicators
-- Lightweight and performance-friendly
+**Floating damage and heal numbers above mobs.**
 
-## ⚙️ Configuration
+[![Available on Modrinth](https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy/available/modrinth_vector.svg)](https://modrinth.com/plugin/damageindicator)
+[![Available on Hangar](https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy/available/hangar_vector.svg)](https://hangar.papermc.io/PunJarrr/DamageIndicator_)
+[![Available on Spigot](https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy/available/spigot_vector.svg)](https://www.spigotmc.org/resources/135211/)
 
-- All settings are configurable in `config.yml`.
-- All messages are fully customizable in translation files using [MiniMessage](https://docs.papermc.io/adventure/minimessage/format/#standard-tags) format.
+![Supports Paper](https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy/supported/paper_vector.svg)
+![Supports Purpur](https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy/supported/purpur_vector.svg)
+![Supports Spigot](https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy/supported/spigot_vector.svg)
 
-```yaml
-# Plugin settings
-settings:
-  # The language file to use from the /lang folder (e.g. en_US).
-  language: en_US
+<img src="https://cdn.modrinth.com/data/7hpegiHp/images/ed7e43ff2cf54f159a4db607153bb3fb66640668.png" alt="A damage number floating above a mob">
 
-  # Customize the damage and heal text displayed above mobs when they are damaged or healed.
-  text-format:
-    # Placeholders:
-    # {damage} - The amount of damage dealt to the mob.
-    # {heal} - The amount of healing received by the mob.
-    # {current} - The mob's current health after the damage or heal is applied.
-    # {max} - The mob's maximum health.
+</div>
 
-    # The text to display when a mob is damaged. Use {damage} to show the damage amount.
-    damage: "<red>-{damage}❤<aqua>[{current}❤]"
-    # The text to display when a mob is healed. Use {heal} to show the heal amount.
-    heal: "<green>+{heal}❤<aqua>[{current}❤]"
+## About
 
-  # The duration (in ticks) that the text will be displayed (1 second = 20 ticks).
-  display-duration: 10
+DamageIndicator is a small server plugin. When a mob takes damage, the damage floats above its head for a
+moment, with its health left. When it heals, the amount healed shows in another colour.
 
-  # The format used for numbers in the displayed text.
-  # Options: int (e.g. 5), double (e.g. 5.25)
-  number-format: int
+- **Damage**, for example `-5❤ [15❤]`, in red.
+- **Healing**, for example `+4❤ [19❤]`, in green.
+- **Your own text**: colours, gradients and formatting with [MiniMessage](https://docs.papermc.io/adventure/minimessage/format/),
+  and the placeholders `{damage}`, `{heal}`, `{current}` and `{max}`.
+- **Adjustable**: how long the text stays, its size, where it appears, whole numbers or decimals.
+- **Blacklist** for mobs that shouldn't show numbers (players by default).
+- **Respects protection**: no numbers when another plugin cancels the damage, such as WorldGuard regions.
+- **Lightweight**: one short-lived text entity per hit, never saved with the world.
 
-  # Settings for the text display entity.
-  text-display:
-    # The scale of the text display (1.0 = default size).
-    scale: 1.0
-    # The billboard mode of the text display.
-    # Options: CENTER (always faces the player), VERTICAL (rotates only on the Y-axis)
-    billboard: CENTER
+## Download
 
-  # The location where the text will be displayed above the mob's head.
-  text-location:
-    # The vertical offset (in blocks) from the mob's head where the text will be displayed.
-    vertical-offset: 0.5
-    # The radius (in blocks) around the mob's head where the text will be displayed.
-    radius: 0.5
+Get it from [Modrinth](https://modrinth.com/plugin/damageindicator),
+[Hangar](https://hangar.papermc.io/PunJarrr/DamageIndicator_),
+[SpigotMC](https://www.spigotmc.org/resources/135211/) or
+[GitHub releases](https://github.com/PunJarrr/DamageIndicator/releases).
+One jar works on every supported server and version. Put it in your server's `plugins` folder and restart.
 
-  # The list of entities that are blacklisted from showing damage or heal indicators.
-  blacklisted-entities:
-    - PLAYER
-```
+| Server | Minecraft |
+|---|---|
+| Paper | 1.19.4 – 26.3 |
+| Purpur | 1.19.4 – 26.3 |
+| Spigot | 1.19.4 – 26.3 |
+| Folia | 1.19.4 – 26.3 |
 
-## 📚 Commands & Permissions
+Only the server needs the plugin. Players don't install anything. 1.19.4 is the oldest version because
+that's when Minecraft added the floating text entities the plugin uses.
 
-| Command                       | Permission                   | Description              |
-| ----------------------------- | ---------------------------- | ------------------------ |
-| ```/damageindicator reload``` | ```damageindicator.reload``` | Reload the configuration. |
+## Configuration
 
-> Aliases: /di reload
+`plugins/DamageIndicator/config.yml`:
+
+| Option | Default | What it does |
+|---|---|---|
+| `settings.language` | `en_US` | Which file in `translations/` to use for command messages. |
+| `settings.text-format.damage` | `<red>-{damage}❤<aqua>[{current}❤]` | The text shown when a mob is damaged. |
+| `settings.text-format.heal` | `<green>+{heal}❤<aqua>[{current}❤]` | The text shown when a mob is healed. |
+| `settings.display-duration` | `10` | How long the text stays, in ticks (20 ticks = 1 second). |
+| `settings.number-format` | `int` | `int` for whole numbers (`5`), `double` for decimals (`5.25`). |
+| `settings.text-display.scale` | `1.0` | Text size (1.0 = normal). |
+| `settings.text-display.billboard` | `CENTER` | `CENTER` always faces the player, `VERTICAL` only turns sideways. |
+| `settings.text-location.vertical-offset` | `0.5` | How far above the mob's head the text appears, in blocks. |
+| `settings.text-location.radius` | `0.5` | How far to the side the text may appear, in blocks, so numbers don't stack. |
+| `settings.blacklisted-entities` | `[PLAYER]` | [Entity types](https://hub.spigotmc.org/javadocs/spigot/org/bukkit/entity/EntityType.html) that never show numbers. Armor stands never do. |
+
+Placeholders for the text: `{damage}` (damage taken), `{heal}` (health gained), `{current}` (health after
+the change) and `{max}` (maximum health).
+
+Command messages are in `plugins/DamageIndicator/translations/<language>.properties`, also in MiniMessage.
+Run `/di reload` after changing anything.
+
+## Commands and permissions
+
+| Command | Permission | Default | What it does |
+|---|---|---|---|
+| `/di reload` | `damageindicator.reload` | operators | Reloads the config and messages. |
+
+`/damageindicator` works too.
+
+## FAQ
+
+**Does it work on Spigot and Folia?**
+Yes, from version 1.1.0. Paper and Purpur are supported too.
+
+**Can I see numbers when players get hurt?**
+Yes. Remove `PLAYER` from `blacklisted-entities` and run `/di reload`.
+
+**Will it leave floating text behind if the server crashes?**
+No. From 1.1.0, the text is never saved with the world, so it can't get stuck. If an older version left
+text behind, stand next to it and run `/kill @e[type=text_display,distance=..3]` to remove it (this
+also removes any other floating text within 3 blocks, such as holograms from other plugins).
+
+**Does it show numbers in protected areas?**
+From 1.1.0, no. When WorldGuard or another plugin cancels the damage or healing, nothing is shown.
+
+## Contributing
+
+Bug reports and ideas are welcome on the
+[issue tracker](https://github.com/PunJarrr/DamageIndicator/issues). To build the plugin or change its
+code, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Credits
+
+DamageIndicator bundles [Adventure and MiniMessage](https://github.com/KyoriPowered/adventure) by
+KyoriPowered (MIT License). See [credits.txt](credits.txt), which is also included in the jar.
+Badges by [devins-badges](https://github.com/intergrav/devins-badges).
+
+## License
+
+[MIT](LICENSE)

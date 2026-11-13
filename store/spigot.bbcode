@@ -1,0 +1,130 @@
+[CENTER][SIZE=6][B]DamageIndicator[/B][/SIZE]
+
+[IMG]https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy/supported/paper_64h.png[/IMG] [IMG]https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy/supported/purpur_64h.png[/IMG] [IMG]https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy/supported/spigot_64h.png[/IMG]
+[URL='https://modrinth.com/plugin/damageindicator'][IMG]https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy-minimal/available/modrinth_64h.png[/IMG][/URL] [URL='https://hangar.papermc.io/PunJarrr/DamageIndicator_'][IMG]https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy-minimal/available/hangar_64h.png[/IMG][/URL] [URL='https://github.com/PunJarrr/DamageIndicator'][IMG]https://raw.githubusercontent.com/intergrav/devins-badges/0a3449fd26bf1375d2c5c26f096c8f30aa358766/assets/cozy-minimal/available/github_64h.png[/IMG][/URL]
+
+Ever wondered exactly how hard that sword hit?
+[B]DamageIndicator[/B] shows the damage floating above the mob, with the health it has left.[/CENTER]
+
+[SIZE=5][B]✨ Features[/B][/SIZE]
+[LIST]
+[*][B]Damage[/B] above the mob's head, like [FONT=Courier New]-5❤ [15❤][/FONT]
+[*][B]Healing[/B] in another colour, like [FONT=Courier New]+4❤ [19❤][/FONT]
+[*][B]Your own text[/B] with colours, gradients and formatting ([URL='https://docs.papermc.io/adventure/minimessage/format/']MiniMessage[/URL]), and the placeholders [FONT=Courier New]{damage}[/FONT], [FONT=Courier New]{heal}[/FONT], [FONT=Courier New]{current}[/FONT], [FONT=Courier New]{max}[/FONT]
+[*][B]Adjustable:[/B] how long the text stays, its size, where it appears, whole numbers or decimals
+[*][B]Blacklist[/B] for mobs that shouldn't show numbers (players by default)
+[*][B]Respects protection:[/B] no numbers when WorldGuard or another plugin cancels the damage
+[*][B]Spigot, Paper, Purpur and Folia[/B], Minecraft [B]1.19.4 – 26.3[/B], one jar for all of them
+[*][B]Lightweight:[/B] one short-lived text entity per hit, never saved with the world
+[/LIST]
+
+[SPOILER="📸 Showcase"]
+[B]Damage[/B]
+[IMG]https://cdn.modrinth.com/data/7hpegiHp/images/ed7e43ff2cf54f159a4db607153bb3fb66640668.png[/IMG]
+
+[B]Heal[/B]
+[IMG]https://cdn.modrinth.com/data/7hpegiHp/images/063e724d40e71e38deeb67754709b1a6c8701e51.png[/IMG]
+[/SPOILER]
+
+[SIZE=5][B]📦 Supported Versions[/B][/SIZE]
+[LIST]
+[*][B]Spigot:[/B] 1.19.4 – 26.3
+[*][B]Paper:[/B] 1.19.4 – 26.3
+[*][B]Purpur:[/B] 1.19.4 – 26.3
+[*][B]Folia:[/B] 1.19.4 – 26.3
+[/LIST]
+
+[SIZE=5][B]📄 Installation[/B][/SIZE]
+[LIST=1]
+[*]Download the jar (the same file works on every server and version above)
+[*]Put it in your server's [FONT=Courier New]plugins[/FONT] folder
+[*]Restart the server
+[/LIST]
+Only the server needs it. Players don't install anything.
+
+[SIZE=5][B]⚙️ Configuration[/B][/SIZE]
+[LIST]
+[*]Change the text, how long it stays, its size and position, and the blacklist in [FONT=Courier New]config.yml[/FONT].
+[*]The text uses [URL='https://docs.papermc.io/adventure/minimessage/format/']MiniMessage[/URL]. Placeholders: [FONT=Courier New]{damage}[/FONT], [FONT=Courier New]{heal}[/FONT], [FONT=Courier New]{current}[/FONT], [FONT=Courier New]{max}[/FONT].
+[*]Command messages are in [FONT=Courier New]translations/<language>.properties[/FONT].
+[*]Run [FONT=Courier New]/di reload[/FONT] after changing anything.
+[/LIST]
+
+[SPOILER="📝 config.yml"]
+[CODE=yaml]############################
+#     Damage Indicator     #
+############################
+
+# Plugin settings
+settings:
+  # The language file to use from the translations folder (e.g. en_US).
+  language: en_US
+
+  # Customize the damage and heal text displayed above mobs when they are damaged or healed.
+  text-format:
+    # Placeholders:
+    # {damage} - The amount of damage dealt to the mob.
+    # {heal} - The amount of healing received by the mob.
+    # {current} - The mob's current health after the damage or heal is applied.
+    # {max} - The mob's maximum health.
+
+    # The text to display when a mob is damaged. Use {damage} to show the damage amount.
+    damage: "<red>-{damage}❤<aqua>[{current}❤]"
+    # The text to display when a mob is healed. Use {heal} to show the heal amount.
+    heal: "<green>+{heal}❤<aqua>[{current}❤]"
+
+  # The duration (in ticks) that the text will be displayed (1 second = 20 ticks).
+  display-duration: 10
+
+  # The format used for numbers in the displayed text.
+  # Options: int (e.g. 5), double (e.g. 5.25)
+  number-format: int
+
+  # Settings for the text display entity.
+  text-display:
+    # The scale of the text display (1.0 = default size).
+    scale: 1.0
+    # The billboard mode of the text display.
+    # Options: CENTER (always faces the player), VERTICAL (rotates only on the Y-axis)
+    billboard: CENTER
+
+  # The location where the text will be displayed above the mob's head.
+  text-location:
+    # The vertical offset (in blocks) from the mob's head where the text will be displayed.
+    vertical-offset: 0.5
+    # The radius (in blocks) around the mob's head where the text will be displayed.
+    radius: 0.5
+
+  # The list of entities that are blacklisted from showing damage or heal indicators.
+  blacklisted-entities:
+    - PLAYER
+
+# Leave this option alone unless you know what you're doing.
+# Changing this value may cause unexpected issues!
+config-version: 1.0.0[/CODE]
+[/SPOILER]
+
+[SIZE=5][B]📚 Commands & Permissions[/B][/SIZE]
+[LIST]
+[*][FONT=Courier New]/di reload[/FONT] ([FONT=Courier New]damageindicator.reload[/FONT], operators): reload the config and messages
+[/LIST]
+
+[SPOILER="❓ FAQ"]
+[B]Does it work on Spigot and Folia?[/B]
+Yes, from 1.1.0. Paper and Purpur work too.
+
+[B]Can I see numbers when players get hurt?[/B]
+Yes. Remove [FONT=Courier New]PLAYER[/FONT] from [FONT=Courier New]blacklisted-entities[/FONT] and run [FONT=Courier New]/di reload[/FONT].
+
+[B]Will it leave floating text behind if the server crashes?[/B]
+No. From 1.1.0, the text is never saved with the world, so it can't get stuck.
+
+[B]Does it show numbers in protected areas?[/B]
+From 1.1.0, no. When WorldGuard or another plugin cancels the damage or healing, nothing is shown.
+[/SPOILER]
+
+[SIZE=5][B]💬 Feedback[/B][/SIZE]
+Found a bug or have an idea? Open an issue on [URL='https://github.com/PunJarrr/DamageIndicator/issues']GitHub[/URL].
+
+[SIZE=5][B]❤️ Credits[/B][/SIZE]
+Bundles [URL='https://github.com/KyoriPowered/adventure']Adventure and MiniMessage[/URL] by KyoriPowered (MIT License).

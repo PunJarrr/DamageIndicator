@@ -1,11 +1,15 @@
 name: DamageIndicator
 version: '${version}'
+description: '${description}'
 
 main: dev.punjarrr.damageIndicator.DamageIndicator
-api-version: '1.21.3'
+# The oldest version we support. One jar runs on every newer version too.
+api-version: '1.19'
+folia-supported: true
 load: POSTWORLD
 
 authors: [ PunJarrr ]
+website: https://modrinth.com/plugin/damageindicator
 
 commands:
   damageindicator:
