@@ -48,7 +48,7 @@ for T in "${TARGETS[@]}"; do
   echo "eula=true" > "$DIR/eula.txt"
   printf '%s\n' 'level-type=flat' 'online-mode=false' 'spawn-protection=0' 'server-port=25565' \
     'enable-rcon=true' 'rcon.port=25575' 'rcon.password=smoketest' 'max-tick-time=-1' \
-    'generate-structures=false' 'spawn-monsters=false' 'spawn-animals=false' > "$DIR/server.properties"
+    'generate-structures=false' 'spawn-monsters=false' > "$DIR/server.properties"
 
   # A server left over from an earlier run would take the port
   if lsof -t -iTCP:25565 -sTCP:LISTEN > /dev/null 2>&1 || lsof -t -iTCP:25575 -sTCP:LISTEN > /dev/null 2>&1; then
@@ -75,24 +75,35 @@ for T in "${TARGETS[@]}"; do
     grep -q "Showing text with .*$EXPECT_TEXT" "$LOG" || PROBLEMS+=("expected text via $EXPECT_TEXT")
     grep -q "removing it with $EXPECT_TASKS" "$LOG" || PROBLEMS+=("expected removal via $EXPECT_TASKS")
 
-    # check <name> <expected output (extended regex)> <commands...>
+    # check <name> <expected output (extended regex)> <commands...>: runs the commands once
     check() {
       local name=$1 expect=$2; shift 2
       local out; out=$(rcon "$@"); echo "$out" >> "$RCON_LOG"
       echo "$out" | tr '\n' ' ' | grep -qE "$expect" || PROBLEMS+=("$name")
     }
+    # poll <name> <expected output> <seconds> <command>: retries until it matches. A freshly started server
+    # can run slower than 20 ticks a second, so anything that waits for game ticks is polled.
+    poll() {
+      local name=$1 expect=$2 seconds=$3 cmd=$4 out
+      for _ in $(seq 1 "$seconds"); do
+        out=$(rcon "$cmd")
+        echo "$out" | tr '\n' ' ' | grep -qE "$expect" && { echo "$out" >> "$RCON_LOG"; return; }
+        sleep 1
+      done
+      echo "$out" >> "$RCON_LOG"; PROBLEMS+=("$name")
+    }
     check "/di reload failed" 'Reloaded configuration successfully' "di reload"
-    rcon "forceload add 0 0" "summon pig 2 -60 2 {NoAI:1b}" "summon cow 0 -60 0 {NoAI:1b,Tags:[\"ditest\"]}" >> "$RCON_LOG"
+    rcon "forceload add 0 0" "summon pig 2 -60 2 {NoAI:1b,Tags:[\"ditest\"]}" "summon cow 0 -60 0 {NoAI:1b,Tags:[\"ditest\"]}" >> "$RCON_LOG"
+    # Damage is shown straight away, during the /damage command
     check "pig got an indicator (it's blacklisted)" 'Applied 1(\.0)? damage.*Test failed' \
-      "damage @e[type=pig,limit=1] 1" "execute if entity @e[type=text_display]"
+      "damage @e[type=pig,tag=ditest,limit=1] 1" "execute if entity @e[type=text_display]"
     check "no damage indicator" '(-3|red.*\[7)' \
       "damage @e[type=cow,tag=ditest,limit=1] 3" "data get entity @e[type=text_display,limit=1] text"
-    # Instant Health heals on the cow's next tick, so give it a moment
+    # Instant Health heals on the cow's next tick
     rcon "kill @e[type=text_display]" "effect give @e[type=cow,tag=ditest] instant_health 1 0" >> "$RCON_LOG"
-    sleep 1
-    check "no heal indicator" '(\+4|green.*\[10)' "data get entity @e[type=text_display,limit=1] text"
-    sleep 6
-    check "indicator did not disappear" 'Test failed' "execute if entity @e[type=text_display]"
+    poll "no heal indicator" '(\+4|green.*\[10)' 10 "data get entity @e[type=text_display,limit=1] text"
+    # display-duration is 100 ticks (5 seconds at full speed)
+    poll "indicator did not disappear" 'Test failed' 20 "execute if entity @e[type=text_display]"
 
     rcon stop > /dev/null
   else

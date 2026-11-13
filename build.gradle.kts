@@ -152,13 +152,21 @@ data class TestServer(val platform: String, val minecraftVersion: String) {
 }
 
 val testServers = listOf(
-    "paper" to listOf("26.3"),
+    "paper" to listOf("1.19.4", "1.20.1", "1.20.4", "1.20.6", "1.21.1", "1.21.4", "1.21.8", "1.21.11", "26.1.2", "26.2", "26.3"),
+    "purpur" to listOf("1.19.4", "26.3"),
+    "folia" to listOf("1.19.4", "1.21.11", "26.3"),
+    "spigot" to listOf("1.19.4", "1.21.11", "26.3"),
 ).flatMap { (platform, versions) -> versions.map { TestServer(platform, it) } }
 
 /** Downloads a file once; delete it to download again. */
 abstract class DownloadFile : DefaultTask() {
     @get:Input abstract val url: Property<String>
     @get:OutputFile abstract val destination: RegularFileProperty
+
+    init {
+        // Checked by file, not by Gradle's history, so a jar restored from the CI cache is used as is
+        onlyIf("the file isn't downloaded yet") { !destination.get().asFile.exists() }
+    }
 
     @TaskAction
     fun download() {
@@ -201,7 +209,10 @@ testServers.forEach { server ->
                 description = "Builds Spigot ${server.minecraftVersion} with BuildTools (takes a few minutes)."
                 val buildTools = downloadBuildTools.flatMap { it.destination }
                 inputs.file(buildTools)
-                outputs.file(outDir.file("spigot-${server.minecraftVersion}.jar"))
+                val spigotJar = outDir.file("spigot-${server.minecraftVersion}.jar")
+                outputs.file(spigotJar)
+                // Built once; a jar restored from the CI cache is used as is. Delete it to build again.
+                onlyIf("Spigot isn't built yet") { !spigotJar.asFile.exists() }
                 classpath(buildTools)
                 javaLauncher = serverJava
                 workingDir = serverCache.dir("buildtools").asFile
