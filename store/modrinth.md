@@ -68,7 +68,7 @@ Only the server needs it. Players don't install anything.
 - Change the text, how long it stays, its size and position, and the blacklist in `config.yml`.
 - The text uses [MiniMessage](https://docs.papermc.io/adventure/minimessage/format/). Placeholders: `{damage}`, `{heal}`, `{current}`, `{max}`.
 - Command messages are in `translations/<language>.properties`.
-- Run `/di reload` after changing anything.
+- Run `/di reload` after changing anything. Updating from an older version? Your `config.yml` is updated automatically, with your settings kept.
 
 <details>
 <summary>📝 config.yml</summary>
@@ -78,12 +78,15 @@ Only the server needs it. Players don't install anything.
 #     Damage Indicator     #
 ############################
 
+# After changing anything, run /di reload.
+
 # Plugin settings
 settings:
-  # The language file to use from the translations folder (e.g. en_US).
+  # The language file to use for command messages, from the translations folder (e.g. en_US).
   language: en_US
 
   # Customize the damage and heal text displayed above mobs when they are damaged or healed.
+  # Uses MiniMessage: https://docs.papermc.io/adventure/minimessage/format/
   text-format:
     # Placeholders:
     # {damage} - The amount of damage dealt to the mob.
@@ -91,40 +94,44 @@ settings:
     # {current} - The mob's current health after the damage or heal is applied.
     # {max} - The mob's maximum health.
 
-    # The text to display when a mob is damaged. Use {damage} to show the damage amount.
-    damage: "<red>-{damage}❤<aqua>[{current}❤]"
-    # The text to display when a mob is healed. Use {heal} to show the heal amount.
-    heal: "<green>+{heal}❤<aqua>[{current}❤]"
+    # The text to display when a mob is damaged.
+    damage: "<red>-{damage}❤ <aqua>[{current}❤]"
+    # The text to display when a mob is healed.
+    heal: "<green>+{heal}❤ <aqua>[{current}❤]"
 
   # The duration (in ticks) that the text will be displayed (1 second = 20 ticks).
   display-duration: 10
 
   # The format used for numbers in the displayed text.
-  # Options: int (e.g. 5), double (e.g. 5.25)
+  # Options: int (whole numbers, rounded down, e.g. 5), double (decimals, e.g. 5.25)
   number-format: int
 
   # Settings for the text display entity.
   text-display:
     # The scale of the text display (1.0 = default size).
     scale: 1.0
-    # The billboard mode of the text display.
-    # Options: CENTER (always faces the player), VERTICAL (rotates only on the Y-axis)
+    # How the text turns to face the player.
+    # Options: CENTER (always faces the player), VERTICAL (turns sideways only),
+    #          HORIZONTAL (tilts up and down only), FIXED (never turns)
     billboard: CENTER
 
   # The location where the text will be displayed above the mob's head.
   text-location:
     # The vertical offset (in blocks) from the mob's head where the text will be displayed.
     vertical-offset: 0.5
-    # The radius (in blocks) around the mob's head where the text will be displayed.
+    # The radius (in blocks) around the mob's head where the text will be displayed,
+    # so numbers from quick hits don't stack on top of each other.
     radius: 0.5
 
-  # The list of entities that are blacklisted from showing damage or heal indicators.
+  # Entity types that never show damage or heal indicators (e.g. PLAYER, VILLAGER, WOLF).
+  # Names: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/entity/EntityType.html
+  # Armor stands never show indicators.
   blacklisted-entities:
     - PLAYER
 
-# Leave this option alone unless you know what you're doing.
-# Changing this value may cause unexpected issues!
-config-version: 1.0.0
+# The version of this file. DamageIndicator uses it to update older config files automatically
+# (your settings are kept, and the old file is saved in the backup folder). Don't change it.
+config-version: 1.1.0
 ```
 </details>
 
@@ -136,6 +143,9 @@ config-version: 1.0.0
 
 <details>
 <summary>❓ FAQ</summary>
+
+**I'm updating from an older version. Do I lose my settings?**
+No. Old config files are updated automatically, your settings are kept, and a backup is saved in `plugins/DamageIndicator/backup/`.
 
 **Does it work on Spigot and Folia?**
 Yes, from 1.1.0. Paper and Purpur work too.

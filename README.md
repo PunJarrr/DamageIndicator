@@ -57,12 +57,12 @@ that's when Minecraft added the floating text entities the plugin uses.
 | Option | Default | What it does |
 |---|---|---|
 | `settings.language` | `en_US` | Which file in `translations/` to use for command messages. |
-| `settings.text-format.damage` | `<red>-{damage}❤<aqua>[{current}❤]` | The text shown when a mob is damaged. |
-| `settings.text-format.heal` | `<green>+{heal}❤<aqua>[{current}❤]` | The text shown when a mob is healed. |
+| `settings.text-format.damage` | `<red>-{damage}❤ <aqua>[{current}❤]` | The text shown when a mob is damaged. |
+| `settings.text-format.heal` | `<green>+{heal}❤ <aqua>[{current}❤]` | The text shown when a mob is healed. |
 | `settings.display-duration` | `10` | How long the text stays, in ticks (20 ticks = 1 second). |
-| `settings.number-format` | `int` | `int` for whole numbers (`5`), `double` for decimals (`5.25`). |
+| `settings.number-format` | `int` | `int` for whole numbers, rounded down (`5`), `double` for decimals (`5.25`). |
 | `settings.text-display.scale` | `1.0` | Text size (1.0 = normal). |
-| `settings.text-display.billboard` | `CENTER` | `CENTER` always faces the player, `VERTICAL` only turns sideways. |
+| `settings.text-display.billboard` | `CENTER` | `CENTER` always faces the player, `VERTICAL` only turns sideways, `HORIZONTAL` only tilts up and down, `FIXED` never turns. |
 | `settings.text-location.vertical-offset` | `0.5` | How far above the mob's head the text appears, in blocks. |
 | `settings.text-location.radius` | `0.5` | How far to the side the text may appear, in blocks, so numbers don't stack. |
 | `settings.blacklisted-entities` | `[PLAYER]` | [Entity types](https://hub.spigotmc.org/javadocs/spigot/org/bukkit/entity/EntityType.html) that never show numbers. Armor stands never do. |
@@ -71,7 +71,8 @@ Placeholders for the text: `{damage}` (damage taken), `{heal}` (health gained), 
 the change) and `{max}` (maximum health).
 
 Command messages are in `plugins/DamageIndicator/translations/<language>.properties`, also in MiniMessage.
-Run `/di reload` after changing anything.
+Run `/di reload` after changing anything. If a setting has a value the plugin doesn't understand (a typo in
+`billboard`, `number-format` or an entity name), the server log says so.
 
 ## Commands and permissions
 
@@ -82,6 +83,11 @@ Run `/di reload` after changing anything.
 `/damageindicator` works too.
 
 ## FAQ
+
+**I'm updating from an older version. Do I lose my settings?**
+No. When the plugin starts, it updates an older `config.yml` to the new layout and keeps all your settings.
+The old file is saved in `plugins/DamageIndicator/backup/`. If you never changed the damage or heal text,
+you get the new default, which has a space before the health (`-5❤ [15❤]`).
 
 **Does it work on Spigot and Folia?**
 Yes, from version 1.1.0. Paper and Purpur are supported too.
