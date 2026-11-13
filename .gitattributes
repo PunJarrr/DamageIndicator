@@ -9,3 +9,10 @@
 
 # Binary files should be left untouched
 *.jar           binary
+
+# Shell scripts should use lf
+*.sh           text eol=lf
+*.py           text eol=lf
+
+# Binary files should be left untouched
+*.jar           binary

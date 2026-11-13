@@ -12,29 +12,29 @@ import org.joml.Vector3f;
 public class TextDisplaySpawner {
 
     public static void spawn(Location location, Component text) {
+        DamageIndicator plugin = DamageIndicator.getInstance();
         int duration = Config.getInt("settings.display-duration", 10);
         float scale = (float) Config.getDouble("settings.text-display.scale", 1.0);
         Display.Billboard billboard = resolveBillboard(Config.getString("settings.text-display.billboard", "CENTER"));
 
-        TextDisplay display = location.getWorld().spawn(location, TextDisplay.class, entity -> {
-            entity.text(text);
-            entity.setBillboard(billboard);
-            entity.setAlignment(TextDisplay.TextAlignment.CENTER);
-            entity.setShadowed(true);
-            entity.setDefaultBackground(false);
-            entity.setTransformation(new Transformation(
-                    new Vector3f(0, 0, 0),
-                    new AxisAngle4f(0, 0, 0, 1),
-                    new Vector3f(scale, scale, scale),
-                    new AxisAngle4f(0, 0, 0, 1)
-            ));
-        });
+        // Set up right after spawning, in the same tick, so players never see a half-made display.
+        // (Spawning with a setup function would need a different method on old and new servers.)
+        TextDisplay display = location.getWorld().spawn(location, TextDisplay.class);
+        // Never saved with the world, so a stop or chunk unload before removal can't leave text behind
+        display.setPersistent(false);
+        plugin.textBridge().setText(display, text);
+        display.setBillboard(billboard);
+        display.setAlignment(TextDisplay.TextAlignment.CENTER);
+        display.setShadowed(true);
+        display.setDefaultBackground(false);
+        display.setTransformation(new Transformation(
+                new Vector3f(0, 0, 0),
+                new AxisAngle4f(0, 0, 0, 1),
+                new Vector3f(scale, scale, scale),
+                new AxisAngle4f(0, 0, 0, 1)
+        ));
 
-        DamageIndicator.getInstance().getServer().getScheduler().runTaskLater(
-                DamageIndicator.getInstance(),
-                display::remove,
-                duration
-        );
+        plugin.tasks().runLater(display, display::remove, duration);
     }
 
     private static Display.Billboard resolveBillboard(String value) {
