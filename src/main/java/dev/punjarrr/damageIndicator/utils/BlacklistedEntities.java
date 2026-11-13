@@ -1,5 +1,6 @@
 package dev.punjarrr.damageIndicator.utils;
 
+import dev.punjarrr.damageIndicator.DamageIndicator;
 import org.bukkit.entity.EntityType;
 
 import java.util.Collection;
@@ -23,7 +24,20 @@ public class BlacklistedEntities {
 
     /** Reads the blacklist from config.yml again (startup and /di reload). */
     public static void reload() {
-        blacklisted = parse(ALWAYS_BLACKLISTED, Config.get().getStringList("settings.blacklisted-entities"));
+        List<String> configured = Config.get().getStringList("settings.blacklisted-entities");
+        blacklisted = parse(ALWAYS_BLACKLISTED, configured);
+        for (String name : unknown(configured)) {
+            DamageIndicator.getInstance().getLogger().warning("settings.blacklisted-entities: '" + name
+                    + "' isn't an entity type on this Minecraft version, so it's ignored.");
+        }
+    }
+
+    static List<String> unknown(Collection<String> names) {
+        List<String> unknown = new java.util.ArrayList<>();
+        for (String name : names) {
+            if (parse(List.of(), List.of(name)).isEmpty()) unknown.add(name);
+        }
+        return unknown;
     }
 
     public static boolean isBlacklisted(EntityType type) {

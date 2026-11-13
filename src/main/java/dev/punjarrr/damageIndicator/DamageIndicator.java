@@ -20,7 +20,7 @@ public final class DamageIndicator extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        Config.init();
+        Config.load();
         Language.init();
         BlacklistedEntities.reload();
 

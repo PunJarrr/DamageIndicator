@@ -7,8 +7,8 @@ public class TextFormatter {
 
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
-    static final String DEFAULT_DAMAGE = "<red>-{damage}❤<aqua>[{current}❤]";
-    static final String DEFAULT_HEAL = "<green>+{heal}❤<aqua>[{current}❤]";
+    static final String DEFAULT_DAMAGE = "<red>-{damage}❤ <aqua>[{current}❤]";
+    static final String DEFAULT_HEAL = "<green>+{heal}❤ <aqua>[{current}❤]";
 
     public static Component formatDamage(double damage, double current, double max) {
         return format(

@@ -14,12 +14,12 @@ class TextFormatterTest {
 
     @Test
     void defaultDamageText() {
-        assertEquals("-3❤[7❤]", plain(TextFormatter.format(TextFormatter.DEFAULT_DAMAGE, "int", 3, 0, 7, 10)));
+        assertEquals("-3❤ [7❤]", plain(TextFormatter.format(TextFormatter.DEFAULT_DAMAGE, "int", 3, 0, 7, 10)));
     }
 
     @Test
     void defaultHealText() {
-        assertEquals("+4❤[10❤]", plain(TextFormatter.format(TextFormatter.DEFAULT_HEAL, "int", 0, 4, 10, 10)));
+        assertEquals("+4❤ [10❤]", plain(TextFormatter.format(TextFormatter.DEFAULT_HEAL, "int", 0, 4, 10, 10)));
     }
 
     @Test
