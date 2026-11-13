@@ -22,9 +22,13 @@ public class TextDisplaySpawner {
         TextDisplay display = location.getWorld().spawn(location, TextDisplay.class);
         // Never saved with the world, so a stop or chunk unload before removal can't leave text behind
         display.setPersistent(false);
+        // Scheduled first, so the text is removed even if a setup step below fails
+        plugin.tasks().runLater(display, display::remove, duration);
+
         plugin.textBridge().setText(display, text);
         display.setBillboard(billboard);
-        display.setAlignment(TextDisplay.TextAlignment.CENTER);
+        // Text is centred by default. (Setting it would break on early 1.19.4 builds, where the alignment
+        // class was spelled TextAligment.)
         display.setShadowed(true);
         display.setDefaultBackground(false);
         display.setTransformation(new Transformation(
@@ -33,8 +37,6 @@ public class TextDisplaySpawner {
                 new Vector3f(scale, scale, scale),
                 new AxisAngle4f(0, 0, 0, 1)
         ));
-
-        plugin.tasks().runLater(display, display::remove, duration);
     }
 
     private static Display.Billboard resolveBillboard(String value) {

@@ -154,7 +154,7 @@ data class TestServer(val platform: String, val minecraftVersion: String) {
 val testServers = listOf(
     "paper" to listOf("1.19.4", "1.20.1", "1.20.4", "1.20.6", "1.21.1", "1.21.4", "1.21.8", "1.21.11", "26.1.2", "26.2", "26.3"),
     "purpur" to listOf("1.19.4", "26.3"),
-    "folia" to listOf("1.19.4", "1.21.11", "26.3"),
+    "folia" to listOf("1.19.4", "1.21.11", "26.1.2", "26.3"),
     "spigot" to listOf("1.19.4", "1.21.11", "26.3"),
 ).flatMap { (platform, versions) -> versions.map { TestServer(platform, it) } }
 

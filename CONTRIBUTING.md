@@ -48,13 +48,14 @@ List every test server:
 ./gradlew -q printTestServers
 ```
 
-Test servers are Paper 1.19.4 – 26.3, plus Purpur, Folia and Spigot at the oldest and newest versions.
+Test servers are Paper 1.19.4 – 26.3, plus Purpur, Folia and Spigot at the oldest and newest versions
+(and Folia 26.1.2, the newest the test bot can join).
 Each runs in `run/<platform>-<version>/`. Spigot is built with Spigot's BuildTools the first time, which
 takes a few minutes.
 
 ## Smoke test
 
-`scripts/smoke-test.sh` boots each test server and, over RCON (the server console), checks that:
+`scripts/smoke-test.sh` boots each test server and checks that:
 
 1. the plugin enables, using the right text path (Paper's Adventure, or colour codes on Spigot) and the
    right scheduler (Folia's entity scheduler on Folia)
@@ -64,11 +65,21 @@ takes a few minutes.
 5. the text is gone again after `display-duration`
 6. the server log has no errors (harmless known lines are listed in `scripts/smoke-test-ignore.txt`).
 
+Checks 2 – 5 run twice: over RCON (the server console), and as a test bot
+([Mineflayer](https://github.com/PrismarineJS/mineflayer), in `tools/smoke-bot/`) that joins as a player
+and reads the floating text it actually receives.
+
+- Folia's console can't reach entities (and on 1.19.4 can't run commands at all), so on Folia only the
+  bot runs checks 2 – 5.
+- Mineflayer can't join Minecraft versions newer than it supports (currently 26.2 and 26.3). Those
+  servers say "bot skipped". On Paper and Spigot the RCON checks still run there; on **Folia 26.3 only
+  checks 1 and 6 run**, and the report says so.
+
 For the test, `display-duration` is set to 100 ticks so there's time to look, and `PIG` is added to the
 blacklist. Everything else uses the default config.
 
 Running it accepts the [Minecraft EULA](https://aka.ms/MinecraftEULA) for the test servers. It needs
-Python 3.
+Python 3 and Node.js 18 or newer.
 
 ```bash
 scripts/smoke-test.sh paper-26.3 spigot-1.19.4
