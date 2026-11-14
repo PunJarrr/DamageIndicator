@@ -179,6 +179,7 @@ abstract class DownloadFile : DefaultTask() {
 }
 
 val serverCache = layout.projectDirectory.dir("run/_servers")
+val testServerRoot = providers.gradleProperty("testServerRoot").orElse("run")
 val pluginJar = tasks.shadowJar.flatMap { it.archiveFile }
 
 val downloadBuildTools = tasks.register<DownloadFile>("downloadBuildTools") {
@@ -226,7 +227,8 @@ testServers.forEach { server ->
     val configure: RunServer.() -> Unit = {
         group = "run paper"
         description = "Runs a ${server.platform} ${server.minecraftVersion} test server with the plugin."
-        runDirectory = layout.projectDirectory.dir("run/${server.id}")
+        // run/<server> for playing on; the smoke test passes -PtestServerRoot=run/smoke so it never touches those
+        runDirectory = layout.projectDirectory.dir(testServerRoot.map { "$it/${server.id}" }.get())
         javaLauncher = serverJava
         jvmArgs("-Xms1G", "-Xmx2G", "-Dcom.mojang.eula.agree=true")
         // Old builds otherwise pause 20 seconds with "this build is outdated"

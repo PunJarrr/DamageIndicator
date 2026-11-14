@@ -22,4 +22,9 @@ class BlacklistedEntitiesTest {
         assertEquals(Set.of(EntityType.ARMOR_STAND, EntityType.PLAYER, EntityType.PIG),
                 BlacklistedEntities.parse(BlacklistedEntities.ALWAYS_BLACKLISTED, List.of("PLAYER", " pig ", "NOT_A_MOB")));
     }
+
+    @Test
+    void unknownNamesAreReported() {
+        assertEquals(List.of("NOT_A_MOB"), BlacklistedEntities.unknown(List.of("PLAYER", "pig", "NOT_A_MOB")));
+    }
 }

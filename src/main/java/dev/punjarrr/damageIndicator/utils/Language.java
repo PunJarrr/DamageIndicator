@@ -7,7 +7,9 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
 
@@ -44,7 +46,8 @@ public class Language {
 
     private static void load(File file) {
         Properties loaded = new Properties();
-        try (InputStream in = new FileInputStream(file)) {
+        // UTF-8, so messages can use any language's letters and symbols such as ❤
+        try (Reader in = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
             loaded.load(in);
             properties = loaded;
         } catch (IOException e) {

@@ -2,6 +2,7 @@ package dev.punjarrr.damageIndicator.commands;
 
 import dev.punjarrr.damageIndicator.DamageIndicator;
 import dev.punjarrr.damageIndicator.utils.BlacklistedEntities;
+import dev.punjarrr.damageIndicator.utils.Config;
 import dev.punjarrr.damageIndicator.utils.Language;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.Command;
@@ -29,7 +30,7 @@ public class DamageIndicatorCommand implements CommandExecutor, TabCompleter {
         }
 
         try {
-            DamageIndicator.getInstance().reloadConfig();
+            Config.load();
             Language.reload();
             BlacklistedEntities.reload();
             send(sender, Language.getComponent("command.reload.success"));

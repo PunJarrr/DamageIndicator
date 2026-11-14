@@ -39,8 +39,11 @@ public class TextDisplaySpawner {
         ));
     }
 
-    private static Display.Billboard resolveBillboard(String value) {
-        if ("VERTICAL".equalsIgnoreCase(value)) return Display.Billboard.VERTICAL;
-        return Display.Billboard.CENTER;
+    static Display.Billboard resolveBillboard(String value) {
+        try {
+            return Display.Billboard.valueOf(value.trim().toUpperCase(java.util.Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            return Display.Billboard.CENTER; // Config.load() warns about it
+        }
     }
 }

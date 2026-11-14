@@ -1,8 +1,8 @@
 // Joins a local test server as SmokeBot (an operator, see scripts/smoke-test.sh) and checks what a player sees:
 //   1. runs /di reload                                        -> expects "Reloaded configuration successfully!"
 //   2. hits a pig (blacklisted in the test config)            -> expects no floating text
-//   3. hits a cow for 3 damage                                -> expects floating text "-3❤[7❤]"
-//   4. heals the cow with Instant Health                      -> expects floating text "+4❤[10❤]"
+//   3. hits a cow for 3 damage                                -> expects floating text "-3❤ [7❤]"
+//   4. heals the cow with Instant Health                      -> expects floating text "+4❤ [10❤]"
 //   5. waits                                                  -> expects all the text to be removed again
 // Commands run as a player, so this also works on Folia, whose console can't reach entities.
 // Prints PASS/FAIL/SKIP lines. Exit code 0 = pass, 1 = fail, 3 = this Minecraft version isn't supported by Mineflayer.
@@ -100,14 +100,14 @@ bot.once('spawn', async () => {
     bot.chat('/damage @e[type=cow,tag=dibot,limit=1] 3')
     const damage = await waitFor(newText(before, '-3'), 8000)
     if (!damage) return finish(1, `FAIL no damage text (saw: ${JSON.stringify(shown())})`)
-    if (damage[1] !== '-3❤[7❤]') return finish(1, `FAIL unexpected damage text: ${damage[1]}`)
+    if (damage[1] !== '-3❤ [7❤]') return finish(1, `FAIL unexpected damage text: ${damage[1]}`)
     console.log(`ok   ${damage[1]}`)
 
     before = new Set(texts.keys())
     bot.chat('/effect give @e[type=cow,tag=dibot] instant_health 1 0')
     const heal = await waitFor(newText(before, '+4'), 8000)
     if (!heal) return finish(1, `FAIL no heal text (saw: ${JSON.stringify(shown())})`)
-    if (heal[1] !== '+4❤[10❤]') return finish(1, `FAIL unexpected heal text: ${heal[1]}`)
+    if (heal[1] !== '+4❤ [10❤]') return finish(1, `FAIL unexpected heal text: ${heal[1]}`)
     console.log(`ok   ${heal[1]}`)
 
     if (!await waitFor(() => shown().length === 0, 20000)) {

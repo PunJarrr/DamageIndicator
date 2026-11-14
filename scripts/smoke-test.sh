@@ -5,6 +5,7 @@
 #   - damaging a cow shows "-3" above it, healing it shows "+4"
 #   - damaging a pig (blacklisted in the test config) shows nothing
 #   - the text disappears again after display-duration
+#   - an old (1.0.0) config.yml is updated, with its settings kept and a backup saved
 # These run over RCON (the server console), and again as a test bot player that checks the text it receives.
 # Folia's console can't reach entities, so on Folia only the bot runs them.
 # Then it stops the server and reports problems.
@@ -41,22 +42,25 @@ FAILED=0
 for T in "${TARGETS[@]}"; do
   PLATFORM=${T%%-*}; VERSION=${T#*-}
   TASK="run$(echo "${PLATFORM:0:1}" | tr a-z A-Z)${PLATFORM:1}_${VERSION//./_}"
-  DIR=$ROOT/run/$T
+  # Its own folder, so the servers you play on (run/<server>, ./gradlew runServer) are never changed
+  DIR=$ROOT/run/smoke/$T
   LOG=$OUT/$T.log; : > "$LOG"
   BUILD_LOG=$OUT/$T.build.log; : > "$BUILD_LOG"
   RCON_LOG=$OUT/$T.rcon.log; : > "$RCON_LOG"
   if [ "$PLATFORM" = spigot ]; then EXPECT_TEXT="colour-coded text"; else EXPECT_TEXT="built-in Adventure"; fi
   if [ "$PLATFORM" = folia ]; then EXPECT_TASKS="Folia's entity scheduler"; else EXPECT_TASKS="the Bukkit scheduler"; fi
 
-  # Fresh world each run, so earlier runs can't affect the result. The plugin config is the default one,
-  # except that the text stays for 5 seconds (instead of half a second) so there's time to look at it,
-  # and pigs are blacklisted.
+  # Fresh world each run, so earlier runs can't affect the result. The plugin gets the config file from
+  # DamageIndicator 1.0.0, so every run also checks it's updated. Two settings differ from the defaults and
+  # must survive the update: the text stays for 5 seconds (instead of half a second) so there's time to look
+  # at it, and pigs are blacklisted.
   mkdir -p "$DIR/plugins/DamageIndicator"
   rm -rf "$DIR"/world "$DIR"/world_nether "$DIR"/world_the_end "$DIR/plugins/DamageIndicator"/*
-  sed 's/^  display-duration: .*/  display-duration: 100/' src/main/resources/config.yml \
+  sed 's/^  display-duration: .*/  display-duration: 100/' src/test/resources/config-1.0.0.yml \
     | awk '{ print } /^    - PLAYER$/ { print "    - PIG" }' > "$DIR/plugins/DamageIndicator/config.yml"
   echo "eula=true" > "$DIR/eula.txt"
-  printf '%s\n' 'level-type=flat' 'online-mode=false' 'enforce-secure-profile=false' 'spawn-protection=0' 'server-port=25565' \
+  # server-ip keeps the game port and RCON (password "smoketest") reachable from this computer only
+  printf '%s\n' 'server-ip=127.0.0.1' 'level-type=flat' 'online-mode=false' 'enforce-secure-profile=false' 'spawn-protection=0' 'server-port=25565' \
     'enable-rcon=true' 'rcon.port=25575' 'rcon.password=smoketest' 'max-tick-time=-1' \
     'generate-structures=false' 'spawn-monsters=false' > "$DIR/server.properties"
   printf '[{"uuid":"%s","name":"SmokeBot","level":4,"bypassesPlayerLimit":false}]\n' "$BOT_UUID" > "$DIR/ops.json"
@@ -71,7 +75,7 @@ for T in "${TARGETS[@]}"; do
     echo "FAIL $T (build failed, see $BUILD_LOG)"; FAILED=1; continue
   fi
 
-  ( ./gradlew "$TASK" < /dev/null >> "$LOG" 2>&1; echo "GRADLE_EXIT=$?" >> "$LOG" ) &
+  ( ./gradlew -PtestServerRoot=run/smoke "$TASK" < /dev/null >> "$LOG" 2>&1; echo "GRADLE_EXIT=$?" >> "$LOG" ) &
 
   STATUS=timeout
   for _ in $(seq 1 900); do
@@ -85,6 +89,12 @@ for T in "${TARGETS[@]}"; do
     grep -q 'Enabling DamageIndicator' "$LOG" || PROBLEMS+=("plugin did not enable")
     grep -q "Showing text with .*$EXPECT_TEXT" "$LOG" || PROBLEMS+=("expected text via $EXPECT_TEXT")
     grep -q "removing it with $EXPECT_TASKS" "$LOG" || PROBLEMS+=("expected removal via $EXPECT_TASKS")
+    CONFIG=$DIR/plugins/DamageIndicator/config.yml
+    grep -q 'Updated config.yml from 1.0.0 to 1.1.0' "$LOG" || PROBLEMS+=("old config.yml was not updated")
+    grep -q '^config-version: 1.1.0$' "$CONFIG" && grep -q '^  display-duration: 100$' "$CONFIG" \
+      && grep -q '^    - PIG$' "$CONFIG" && grep -q '^    damage: "<red>-{damage}❤ <aqua>\[{current}❤\]"$' "$CONFIG" \
+      || PROBLEMS+=("updated config.yml lost a setting or kept the old default text")
+    ls "$DIR"/plugins/DamageIndicator/backup/config-1.0.0-*.yml > /dev/null 2>&1 || PROBLEMS+=("no backup of the old config")
 
     # check <name> <expected output (extended regex)> <commands...>: runs the commands once
     check() {
