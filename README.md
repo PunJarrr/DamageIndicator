@@ -61,6 +61,7 @@ that's when Minecraft added the floating text entities the plugin uses.
 | `settings.text-format.heal` | `<green>+{heal}❤ <aqua>[{current}❤]` | The text shown when a mob is healed. |
 | `settings.display-duration` | `10` | How long the text stays, in ticks (20 ticks = 1 second). |
 | `settings.number-format` | `int` | `int` for whole numbers, rounded down (`5`), `double` for decimals (`5.25`). |
+| `settings.decimal-places` | `1` | The most decimals shown when `number-format` is `double` (`2` gives `5.25`). |
 | `settings.text-display.scale` | `1.0` | Text size (1.0 = normal). |
 | `settings.text-display.billboard` | `CENTER` | `CENTER` always faces the player, `VERTICAL` only turns sideways, `HORIZONTAL` only tilts up and down, `FIXED` never turns. |
 | `settings.text-location.vertical-offset` | `0.5` | How far above the mob's head the text appears, in blocks. |
