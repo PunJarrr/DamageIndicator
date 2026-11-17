@@ -65,8 +65,10 @@ takes a few minutes.
 5. the text is gone again after `display-duration`
 6. the server log has no errors (harmless known lines are listed in `scripts/smoke-test-ignore.txt`)
 7. an old config file is updated: each server starts with the `config.yml` from DamageIndicator 1.0.0
-   (`src/test/resources/config-1.0.0.yml`), which must come out as `config-version: 1.1.0` with its settings
-   kept, the new default text, and a backup in `backup/`.
+   (`src/test/resources/config-1.0.0.yml`), which must come out as `config-version: 1.2.0` with its settings
+   kept, the new default text, the new `show-numbers-by-default` option, and a backup in `backup/`.
+8. (test bot only) after `/di`, the bot gets no text when the cow is hit, also after leaving and joining
+   again, and after `/di` once more it gets `-1❤ [7❤]`.
 
 Checks 2 – 5 run twice: over RCON (the server console), and as a test bot
 ([Mineflayer](https://github.com/PrismarineJS/mineflayer), in `tools/smoke-bot/`) that joins as a player
@@ -120,6 +122,12 @@ The smoke test can't see the text or check every setting. Before a release, join
 - [ ] Hit a mob, then stop the server within half a second (`stop`). After starting again, no text is
       left floating.
 - [ ] As a non-operator, `/di reload` says you don't have permission.
+- [ ] Type `/di` (as anyone): it says numbers are now off, and hitting a mob shows you nothing. A second
+      player nearby still sees the numbers. Rejoin: still off. `/di` again: back on.
+- [ ] Set `show-numbers-by-default: false`, `/di reload`: a player who never used `/di` sees no numbers, and
+      `/di` turns them on for them. Players who already chose keep their choice.
+- [ ] `/di` in the server console says only players can turn numbers on or off.
+- [ ] With `damageindicator.toggle` taken away (e.g. with LuckPerms), `/di` says you don't have permission.
 
 ## Pull requests
 

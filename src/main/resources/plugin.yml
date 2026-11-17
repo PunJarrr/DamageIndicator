@@ -13,12 +13,15 @@ website: https://modrinth.com/plugin/damageindicator
 
 commands:
   damageindicator:
-    description: DamageIndicator plugin command.
-    usage: /damageindicator [reload]
+    description: Turns damage numbers on or off for you, or reloads the config.
+    usage: /<command> [toggle|reload]
     aliases: [ di ]
-    permission: damageindicator.reload
+    # No permission here: each subcommand checks its own (see below)
 
 permissions:
+  damageindicator.toggle:
+    description: Allows turning damage numbers on or off for yourself with /di.
+    default: true
   damageindicator.reload:
     description: Allows reloading the DamageIndicator configuration.
     default: op

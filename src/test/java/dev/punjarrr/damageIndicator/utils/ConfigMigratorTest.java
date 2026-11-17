@@ -92,6 +92,50 @@ class ConfigMigratorTest {
         assertEquals("th_TH", config.getString("settings.language"));
     }
 
+    private static String config1_1_0() throws Exception {
+        try (InputStream in = ConfigMigratorTest.class.getResourceAsStream("/config-1.1.0.yml")) {
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
+    }
+
+    @Test
+    void anUnchanged1_1_0ConfigGetsTheNewOptionAndBecomesTheNewDefaultFile(@TempDir Path dir) throws Exception {
+        Files.writeString(dir.resolve("config.yml"), config1_1_0());
+
+        assertTrue(migrate(dir));
+
+        String bundledText;
+        try (InputStream in = bundled()) {
+            bundledText = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        assertEquals(bundledText, Files.readString(dir.resolve("config.yml")));
+        assertTrue(load(dir.resolve("config.yml")).getBoolean("settings.show-numbers-by-default"));
+        File[] backups = backups(dir);
+        assertEquals(1, backups.length);
+        assertTrue(backups[0].getName().startsWith("config-1.1.0-"));
+    }
+
+    @Test
+    void aCustomised1_1_0ConfigKeepsItsSettingsAndGetsTheNewOption(@TempDir Path dir) throws Exception {
+        String custom = config1_1_0()
+                .replace("damage: \"<red>-{damage}❤ <aqua>[{current}❤]\"", "damage: \"<gold>{damage}\"")
+                .replace("display-duration: 10", "display-duration: 25")
+                .replace("scale: 1.0", "scale: 1.5")
+                .replace("    - PLAYER", "    - PLAYER\n    - PIG");
+        Files.writeString(dir.resolve("config.yml"), custom);
+
+        assertTrue(migrate(dir));
+
+        YamlConfiguration config = load(dir.resolve("config.yml"));
+        assertEquals("<gold>{damage}", config.getString("settings.text-format.damage"));
+        assertEquals(TextFormatter.DEFAULT_HEAL, config.getString("settings.text-format.heal"));
+        assertEquals(25, config.getInt("settings.display-duration"));
+        assertEquals(1.5, config.getDouble("settings.text-display.scale"));
+        assertEquals(List.of("PLAYER", "PIG"), config.getStringList("settings.blacklisted-entities"));
+        assertTrue(config.getBoolean("settings.show-numbers-by-default"));
+        assertEquals(ConfigMigrator.CURRENT_VERSION, config.getString("config-version"));
+    }
+
     @Test
     void aConfigWithoutAVersionIsTreatedAs1_0_0(@TempDir Path dir) throws Exception {
         Files.writeString(dir.resolve("config.yml"), "settings:\n  display-duration: 40\n");
@@ -163,6 +207,7 @@ class ConfigMigratorTest {
         assertEquals(TextFormatter.DEFAULT_HEAL, config.getString("settings.text-format.heal"));
         assertEquals(10, config.getInt("settings.display-duration"));
         assertEquals(List.of("PLAYER"), config.getStringList("settings.blacklisted-entities"));
+        assertTrue(config.getBoolean("settings.show-numbers-by-default"));
         assertEquals(List.of(), Config.problems(config));
     }
 
@@ -171,10 +216,12 @@ class ConfigMigratorTest {
         YamlConfiguration config = new YamlConfiguration();
         config.set("settings.text-display.billboard", "CENTRE");
         config.set("settings.number-format", "decimal");
-        assertEquals(2, Config.problems(config).size());
+        config.set("settings.show-numbers-by-default", "maybe");
+        assertEquals(3, Config.problems(config).size());
 
         config.set("settings.text-display.billboard", "horizontal");
         config.set("settings.number-format", "DOUBLE");
+        config.set("settings.show-numbers-by-default", false);
         assertEquals(List.of(), Config.problems(config));
     }
 

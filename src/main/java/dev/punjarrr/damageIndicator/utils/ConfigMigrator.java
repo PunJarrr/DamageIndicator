@@ -29,7 +29,7 @@ import java.util.logging.Logger;
  */
 public final class ConfigMigrator {
 
-    public static final String CURRENT_VERSION = "1.1.0";
+    public static final String CURRENT_VERSION = "1.2.0";
 
     /** Config files without a config-version are treated as this, the first released layout. */
     static final String OLDEST_VERSION = "1.0.0";

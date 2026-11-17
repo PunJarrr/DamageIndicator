@@ -29,6 +29,7 @@ moment, with its health left. When it heals, the amount healed shows in another 
   and the placeholders `{damage}`, `{heal}`, `{current}` and `{max}`.
 - **Adjustable**: how long the text stays, its size, where it appears, whole numbers or decimals.
 - **Blacklist** for mobs that shouldn't show numbers (players by default).
+- **Players choose**: anyone can turn the numbers off or back on for themselves with `/di`, and it's remembered.
 - **Respects protection**: no numbers when another plugin cancels the damage, such as WorldGuard regions.
 - **Lightweight**: one short-lived text entity per hit, never saved with the world.
 
@@ -66,6 +67,7 @@ that's when Minecraft added the floating text entities the plugin uses.
 | `settings.text-location.vertical-offset` | `0.5` | How far above the mob's head the text appears, in blocks. |
 | `settings.text-location.radius` | `0.5` | How far to the side the text may appear, in blocks, so numbers don't stack. |
 | `settings.blacklisted-entities` | `[PLAYER]` | [Entity types](https://hub.spigotmc.org/javadocs/spigot/org/bukkit/entity/EntityType.html) that never show numbers. Armor stands never do. |
+| `settings.show-numbers-by-default` | `true` | Whether players see numbers before they've used `/di`. `false` means players turn them on with `/di` instead. Each player's own choice is kept either way. |
 
 Placeholders for the text: `{damage}` (damage taken), `{heal}` (health gained), `{current}` (health after
 the change) and `{max}` (maximum health).
@@ -78,6 +80,7 @@ Run `/di reload` after changing anything. If a setting has a value the plugin do
 
 | Command | Permission | Default | What it does |
 |---|---|---|---|
+| `/di` | `damageindicator.toggle` | everyone | Turns damage numbers off or back on, just for you. Remembered across logins and restarts. `/di toggle` does the same. |
 | `/di reload` | `damageindicator.reload` | operators | Reloads the config and messages. |
 
 `/damageindicator` works too.
@@ -91,6 +94,12 @@ you get the new default, which has a space before the health (`-5❤ [15❤]`).
 
 **Does it work on Spigot and Folia?**
 Yes, from version 1.1.0. Paper and Purpur are supported too.
+
+**Can players turn the numbers off?**
+Yes, from 1.2.0. Each player types `/di` to turn them off or back on. The choice is saved with the player,
+so it's remembered across logins and restarts. To start with numbers off for everyone, set
+`show-numbers-by-default: false`. To stop players turning them off, take away the `damageindicator.toggle`
+permission.
 
 **Can I see numbers when players get hurt?**
 Yes. Remove `PLAYER` from `blacklisted-entities` and run `/di reload`.

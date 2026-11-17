@@ -7,6 +7,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -27,7 +28,23 @@ public class Language {
             plugin.getLogger().warning("Language '" + language + "' not found, falling back to en_US.");
             file = resolveFile(plugin, "en_US");
         }
-        if (file != null) load(file);
+        if (file != null) load(file, bundled(plugin, language));
+    }
+
+    /**
+     * The messages that came with this version of the plugin. A language file saved by an older version is kept
+     * as the server owner left it, so messages added since come from here.
+     */
+    private static Properties bundled(DamageIndicator plugin, String language) {
+        Properties bundled = new Properties();
+        for (String name : new String[] {"en_US", language}) {
+            try (InputStream in = plugin.getResource("translations/" + name + ".properties")) {
+                if (in != null) bundled.load(new InputStreamReader(in, StandardCharsets.UTF_8));
+            } catch (IOException ignored) {
+                // Keep what was read so far
+            }
+        }
+        return bundled;
     }
 
     public static void reload() {
@@ -44,8 +61,8 @@ public class Language {
         return file;
     }
 
-    private static void load(File file) {
-        Properties loaded = new Properties();
+    private static void load(File file, Properties defaults) {
+        Properties loaded = new Properties(defaults);
         // UTF-8, so messages can use any language's letters and symbols such as ❤
         try (Reader in = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
             loaded.load(in);

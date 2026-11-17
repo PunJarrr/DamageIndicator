@@ -6,6 +6,8 @@
 #   - damaging a pig (blacklisted in the test config) shows nothing
 #   - the text disappears again after display-duration
 #   - an old (1.0.0) config.yml is updated, with its settings kept and a backup saved
+#   - (bot only) a player who turns the numbers off with /di gets none, also after rejoining, until they turn
+#     them back on; the server has an old (1.1.0) messages file, so the new /di messages must come from the jar
 # These run over RCON (the server console), and again as a test bot player that checks the text it receives.
 # Folia's console can't reach entities, so on Folia only the bot runs them.
 # Then it stops the server and reports problems.
@@ -58,6 +60,10 @@ for T in "${TARGETS[@]}"; do
   rm -rf "$DIR"/world "$DIR"/world_nether "$DIR"/world_the_end "$DIR/plugins/DamageIndicator"/*
   sed 's/^  display-duration: .*/  display-duration: 100/' src/test/resources/config-1.0.0.yml \
     | awk '{ print } /^    - PLAYER$/ { print "    - PIG" }' > "$DIR/plugins/DamageIndicator/config.yml"
+  # The messages file from DamageIndicator 1.1.0, which has no /di toggle messages: the bot's "now off" check
+  # makes sure messages added since still show
+  mkdir -p "$DIR/plugins/DamageIndicator/translations"
+  cp src/test/resources/en_US-1.1.0.properties "$DIR/plugins/DamageIndicator/translations/en_US.properties"
   echo "eula=true" > "$DIR/eula.txt"
   # server-ip keeps the game port and RCON (password "smoketest") reachable from this computer only
   printf '%s\n' 'server-ip=127.0.0.1' 'level-type=flat' 'online-mode=false' 'enforce-secure-profile=false' 'spawn-protection=0' 'server-port=25565' \
@@ -90,9 +96,10 @@ for T in "${TARGETS[@]}"; do
     grep -q "Showing text with .*$EXPECT_TEXT" "$LOG" || PROBLEMS+=("expected text via $EXPECT_TEXT")
     grep -q "removing it with $EXPECT_TASKS" "$LOG" || PROBLEMS+=("expected removal via $EXPECT_TASKS")
     CONFIG=$DIR/plugins/DamageIndicator/config.yml
-    grep -q 'Updated config.yml from 1.0.0 to 1.1.0' "$LOG" || PROBLEMS+=("old config.yml was not updated")
-    grep -q '^config-version: 1.1.0$' "$CONFIG" && grep -q '^  display-duration: 100$' "$CONFIG" \
+    grep -q 'Updated config.yml from 1.0.0 to 1.2.0' "$LOG" || PROBLEMS+=("old config.yml was not updated")
+    grep -q '^config-version: 1.2.0$' "$CONFIG" && grep -q '^  display-duration: 100$' "$CONFIG" \
       && grep -q '^    - PIG$' "$CONFIG" && grep -q '^    damage: "<red>-{damage}❤ <aqua>\[{current}❤\]"$' "$CONFIG" \
+      && grep -q '^  show-numbers-by-default: true$' "$CONFIG" \
       || PROBLEMS+=("updated config.yml lost a setting or kept the old default text")
     ls "$DIR"/plugins/DamageIndicator/backup/config-1.0.0-*.yml > /dev/null 2>&1 || PROBLEMS+=("no backup of the old config")
 

@@ -41,6 +41,10 @@ public class Config {
             problems.add("settings.number-format is '" + numberFormat + "', using int. Options: "
                     + String.join(", ", NUMBER_FORMATS));
         }
+        String showByDefault = "settings.show-numbers-by-default";
+        if (config.contains(showByDefault) && !config.isBoolean(showByDefault)) {
+            problems.add(showByDefault + " is '" + config.getString(showByDefault) + "', using true. Options: true, false");
+        }
         return problems;
     }
 
