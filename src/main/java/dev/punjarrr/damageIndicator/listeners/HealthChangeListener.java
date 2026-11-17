@@ -8,9 +8,12 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.util.BoundingBox;
@@ -31,7 +34,7 @@ public class HealthChangeListener implements Listener {
         double current = Math.max(0, livingEntity.getHealth() - damage);
 
         Location textLocation = TextLocation.getTextLocation(getTopHitbox(livingEntity));
-        Component text = TextFormatter.formatDamage(damage, current, max);
+        Component text = TextFormatter.formatDamage(damage, current, max, attacker(event));
 
         TextDisplaySpawner.spawn(textLocation, text);
     }
@@ -51,6 +54,15 @@ public class HealthChangeListener implements Listener {
         Component text = TextFormatter.formatHeal(heal, current, max);
 
         TextDisplaySpawner.spawn(textLocation, text);
+    }
+
+    /** The player who caused the damage (also with an arrow, trident, ...), for placeholders, or null. */
+    private static Player attacker(EntityDamageEvent event) {
+        if (!(event instanceof EntityDamageByEntityEvent byEntity)) return null;
+        Entity damager = byEntity.getDamager();
+        if (damager instanceof Player player) return player;
+        if (damager instanceof Projectile projectile && projectile.getShooter() instanceof Player player) return player;
+        return null;
     }
 
     /**

@@ -8,6 +8,11 @@
 - `damageindicator.toggle` permission for `/di`, given to everyone by default.
 - `show-numbers-by-default` in `config.yml`: set it to `false` to start with numbers off, so players turn them
   on with `/di` instead.
+- PlaceholderAPI support (optional):
+  - `%damageindicator_shown%` (`true`/`false`) and `%damageindicator_status%` (`ON`/`OFF`), whether a player
+    sees the numbers.
+  - Other plugins' placeholders work in the damage and heal text (filled in for the player who hit the mob)
+    and in messages (for the player who ran the command).
 
 ### Changed
 - `/di` on its own now turns the numbers on or off. Before, it only showed the usage message, and only for

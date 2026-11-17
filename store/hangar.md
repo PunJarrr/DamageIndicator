@@ -30,6 +30,7 @@ Ever wondered exactly how hard that sword hit? **DamageIndicator** shows the dam
 - **Adjustable:** how long the text stays, its size, where it appears, whole numbers or decimals
 - **Blacklist** for mobs that shouldn't show numbers (players by default)
 - **Players choose:** anyone can turn the numbers off or back on for themselves with `/di`, and it's remembered
+- **PlaceholderAPI** (optional): placeholders for scoreboards and menus, and other plugins' placeholders in the text
 - **Respects protection:** no numbers when WorldGuard or another plugin cancels the damage
 - **Paper, Purpur, Spigot and Folia**, Minecraft **1.19.4 – 26.3**, one jar for all of them
 - **Lightweight:** one short-lived text entity per hit, never saved with the world
@@ -146,6 +147,17 @@ config-version: 1.2.0
 |---|---|---|
 | `/di` | `damageindicator.toggle` | Turn damage numbers off or back on, just for you. Remembered across logins (everyone by default). |
 | `/di reload` | `damageindicator.reload` | Reload the config and messages (operators by default). |
+
+## 🧩 PlaceholderAPI
+
+Optional. With [PlaceholderAPI](https://hangar.papermc.io/HelpChat/PlaceholderAPI) installed:
+
+| Placeholder | Shows |
+|---|---|
+| `%damageindicator_shown%` | `true` or `false`: whether the player sees the numbers |
+| `%damageindicator_status%` | `ON` or `OFF` in colour (change the words in `translations/<language>.properties`) |
+
+Other plugins' placeholders also work in the damage text (filled in for the player who hit the mob, like `%player_name%`) and in messages.
 
 <details>
 <summary>❓ FAQ</summary>

@@ -7,6 +7,8 @@ main: dev.punjarrr.damageIndicator.DamageIndicator
 api-version: '1.19'
 folia-supported: true
 load: POSTWORLD
+# Optional: when it is installed, DamageIndicator offers placeholders and reads them in its text
+softdepend: [ PlaceholderAPI ]
 
 authors: [ PunJarrr ]
 website: https://modrinth.com/plugin/damageindicator

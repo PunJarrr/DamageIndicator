@@ -33,27 +33,27 @@ public class DamageIndicatorCommand implements CommandExecutor, TabCompleter {
         switch (subcommand) {
             case "toggle" -> toggle(sender, placeholders);
             case "reload" -> reload(sender);
-            default -> send(sender, Language.getComponent("command.usage", placeholders));
+            default -> send(sender, Language.getComponent("command.usage", placeholders, sender));
         }
         return true;
     }
 
     private static void toggle(CommandSender sender, Map<String, String> placeholders) {
         if (!(sender instanceof Player player)) {
-            send(sender, Language.getComponent("command.players-only", placeholders));
+            send(sender, Language.getComponent("command.players-only", placeholders, sender));
             return;
         }
         if (!sender.hasPermission(TOGGLE_PERMISSION)) {
-            send(sender, Language.getComponent("command.no-permission"));
+            send(sender, Language.getComponent("command.no-permission", Map.of(), sender));
             return;
         }
         boolean nowSees = PlayerToggle.toggle(player);
-        send(sender, Language.getComponent(nowSees ? "command.toggle.on" : "command.toggle.off", placeholders));
+        send(sender, Language.getComponent(nowSees ? "command.toggle.on" : "command.toggle.off", placeholders, sender));
     }
 
     private static void reload(CommandSender sender) {
         if (!sender.hasPermission(RELOAD_PERMISSION)) {
-            send(sender, Language.getComponent("command.no-permission"));
+            send(sender, Language.getComponent("command.no-permission", Map.of(), sender));
             return;
         }
         try {
@@ -61,9 +61,9 @@ public class DamageIndicatorCommand implements CommandExecutor, TabCompleter {
             Language.reload();
             BlacklistedEntities.reload();
             PlayerToggle.reload();
-            send(sender, Language.getComponent("command.reload.success"));
+            send(sender, Language.getComponent("command.reload.success", Map.of(), sender));
         } catch (Exception e) {
-            send(sender, Language.getComponent("command.reload.failed", Map.of("{error}", String.valueOf(e.getMessage()))));
+            send(sender, Language.getComponent("command.reload.failed", Map.of("{error}", String.valueOf(e.getMessage())), sender));
         }
     }
 

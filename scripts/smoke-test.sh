@@ -8,6 +8,8 @@
 #   - an old (1.0.0) config.yml is updated, with its settings kept and a backup saved
 #   - (bot only) a player who turns the numbers off with /di gets none, also after rejoining, until they turn
 #     them back on; the server has an old (1.1.0) messages file, so the new /di messages must come from the jar
+#   - PlaceholderAPI: most servers have it, and the bot checks %damageindicator_status% in the damage text, in
+#     a message and with /papi parse. A few servers run without it, to check the plugin works either way.
 # These run over RCON (the server console), and again as a test bot player that checks the text it receives.
 # Folia's console can't reach entities, so on Folia only the bot runs them.
 # Then it stops the server and reports problems.
@@ -40,9 +42,13 @@ fi
 # Offline-mode UUID of SmokeBot, so it can be made an operator before it joins
 BOT_UUID=$(python3 -I -c 'import hashlib, uuid; print(uuid.UUID(bytes=hashlib.md5(b"OfflinePlayer:SmokeBot").digest(), version=3))')
 
+# These run without PlaceholderAPI (one of each kind of server); all others have it
+NO_PLACEHOLDERAPI=" paper-1.20.6 folia-1.21.11 spigot-1.21.11 "
+
 FAILED=0
 for T in "${TARGETS[@]}"; do
   PLATFORM=${T%%-*}; VERSION=${T#*-}
+  case "$NO_PLACEHOLDERAPI" in *" $T "*) PAPI=false ;; *) PAPI=true ;; esac
   TASK="run$(echo "${PLATFORM:0:1}" | tr a-z A-Z)${PLATFORM:1}_${VERSION//./_}"
   # Its own folder, so the servers you play on (run/<server>, ./gradlew runServer) are never changed
   DIR=$ROOT/run/smoke/$T
@@ -64,6 +70,11 @@ for T in "${TARGETS[@]}"; do
   # makes sure messages added since still show
   mkdir -p "$DIR/plugins/DamageIndicator/translations"
   cp src/test/resources/en_US-1.1.0.properties "$DIR/plugins/DamageIndicator/translations/en_US.properties"
+  # With PlaceholderAPI, a message with a placeholder in it (read for the player who runs the command)
+  [ "$PAPI" = true ] && echo 'command.reload.success=<green>Reloaded configuration successfully! <gray>%damageindicator_shown%' \
+    >> "$DIR/plugins/DamageIndicator/translations/en_US.properties"
+  # Spigot gets plugins copied into plugins/; don't keep PlaceholderAPI from an earlier run
+  rm -f "$DIR"/plugins/*laceholder*.jar
   echo "eula=true" > "$DIR/eula.txt"
   # server-ip keeps the game port and RCON (password "smoketest") reachable from this computer only
   printf '%s\n' 'server-ip=127.0.0.1' 'level-type=flat' 'online-mode=false' 'enforce-secure-profile=false' 'spawn-protection=0' 'server-port=25565' \
@@ -81,7 +92,7 @@ for T in "${TARGETS[@]}"; do
     echo "FAIL $T (build failed, see $BUILD_LOG)"; FAILED=1; continue
   fi
 
-  ( ./gradlew -PtestServerRoot=run/smoke "$TASK" < /dev/null >> "$LOG" 2>&1; echo "GRADLE_EXIT=$?" >> "$LOG" ) &
+  ( ./gradlew -PtestServerRoot=run/smoke -PplaceholderApi=$PAPI "$TASK" < /dev/null >> "$LOG" 2>&1; echo "GRADLE_EXIT=$?" >> "$LOG" ) &
 
   STATUS=timeout
   for _ in $(seq 1 900); do
@@ -102,6 +113,11 @@ for T in "${TARGETS[@]}"; do
       && grep -q '^  show-numbers-by-default: true$' "$CONFIG" \
       || PROBLEMS+=("updated config.yml lost a setting or kept the old default text")
     ls "$DIR"/plugins/DamageIndicator/backup/config-1.0.0-*.yml > /dev/null 2>&1 || PROBLEMS+=("no backup of the old config")
+    if [ "$PAPI" = true ]; then
+      grep -q 'Hooked into PlaceholderAPI' "$LOG" || PROBLEMS+=("did not hook into PlaceholderAPI")
+    else
+      grep -q 'Hooked into PlaceholderAPI' "$LOG" && PROBLEMS+=("hooked into PlaceholderAPI, which isn't installed")
+    fi
 
     # check <name> <expected output (extended regex)> <commands...>: runs the commands once
     check() {
@@ -138,7 +154,15 @@ for T in "${TARGETS[@]}"; do
     poll "indicator did not disappear" 'Test failed' 20 "execute if entity @e[type=text_display]"
     fi
 
-    BOT=$(node tools/smoke-bot/bot.js 25565 2>&1); BOT_EXIT=$?
+    if [ "$PAPI" = true ]; then
+      # The bot's /di reload picks this up: the damage text gets the attacking player's %damageindicator_status%
+      sed -i.bak 's/^    damage: "<red>-{damage}❤ <aqua>\[{current}❤\]"$/    damage: "<red>-{damage}❤ <aqua>[{current}❤] %damageindicator_status%"/' "$CONFIG"
+      rm -f "$CONFIG.bak"
+      grep -q 'damageindicator_status' "$CONFIG" || PROBLEMS+=("could not add a placeholder to the damage text")
+      BOT=$(node tools/smoke-bot/bot.js 25565 papi 2>&1); BOT_EXIT=$?
+    else
+      BOT=$(node tools/smoke-bot/bot.js 25565 2>&1); BOT_EXIT=$?
+    fi
     echo "$BOT" > "$OUT/$T.bot.log"
     case $BOT_EXIT in
       0) NOTE="bot ok" ;;
@@ -165,6 +189,7 @@ for T in "${TARGETS[@]}"; do
   ERRORS=$(sed 's/\x1b\[[0-9;]*m//g' "$LOG" | grep -E '(ERROR\]|/ERROR|SEVERE\]|Exception)' | grep -vE "${IGNORE:-^\$}" | head -5)
   [ -n "$ERRORS" ] && PROBLEMS+=("errors in the server log")
 
+  [ "$PAPI" = false ] && NOTE="$NOTE, without PlaceholderAPI"
   if [ ${#PROBLEMS[@]} -eq 0 ]; then
     echo "PASS $T ($NOTE)"
   else

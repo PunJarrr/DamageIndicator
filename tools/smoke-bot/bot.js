@@ -7,14 +7,23 @@
 //   6. runs /di, then hits the cow for 1                      -> expects "now off", and no floating text
 //   7. leaves and joins again, hits the cow for 1             -> still no floating text (the choice was saved)
 //   8. runs /di, then hits the cow for 1                      -> expects "now on", and "-1❤ [7❤]"
+// With "papi" (the server has PlaceholderAPI, and the damage text ends in %damageindicator_status%):
+//   - the /di reload reply ends in "true" (a placeholder in a message, read for the bot)
+//   - damage text ends in " ON" (a placeholder in the text, read for the bot, who hits the cow)
+//   - /papi parse me %damageindicator_status% says OFF after step 6 and 7, and ON after step 8
 // Commands run as a player, so this also works on Folia, whose console can't reach entities.
 // Prints PASS/FAIL/SKIP lines. Exit code 0 = pass, 1 = fail, 3 = this Minecraft version isn't supported by Mineflayer.
 //
-//   node bot.js <port>
+//   node bot.js <port> [papi]
 const mineflayer = require('mineflayer')
 const nbt = require('prismarine-nbt')
 
 const port = Number(process.argv[2] || 25565)
+const papi = process.argv[3] === 'papi'
+// What the damage text ends with: the attacker's %damageindicator_status%, when PlaceholderAPI is there
+const suffix = papi ? ' ON' : ''
+// The bot hits the mobs itself, so placeholders in the damage text are read for the bot
+const hit = (mob, amount) => bot.chat(`/damage @e[type=${mob},tag=dibot,limit=1] ${amount} minecraft:player_attack by @s`)
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 // Text components arrive as JSON strings (older versions) or NBT (1.20.3+). Reduce them to plain text.
@@ -107,11 +116,22 @@ async function command (text, wanted) {
 // Hits the cow for 1 and expects no floating text, as the numbers are turned off
 async function expectNoTextForDamage (why) {
   const before = new Set(texts.keys())
-  bot.chat('/damage @e[type=cow,tag=dibot,limit=1] 1')
+  hit('cow', 1)
   await sleep(2500)
   const seen = newTexts(before)
   if (seen.length) finish(1, `FAIL got text ${why}: ${JSON.stringify(seen)}`)
   console.log(`ok   no text ${why}`)
+}
+
+// /papi parse: what %damageindicator_status% is for the bot now
+async function expectStatus (wanted) {
+  if (!papi) return
+  const count = chatLines.length
+  bot.chat('/papi parse me %damageindicator_status%')
+  if (!await waitFor(() => chatLines.slice(count).find(line => line.trim() === wanted), 8000)) {
+    finish(1, `FAIL %damageindicator_status% is not ${wanted} (saw: ${JSON.stringify(chatLines.slice(count))})`)
+  }
+  console.log(`ok   %damageindicator_status% is ${wanted}`)
 }
 
 async function main () {
@@ -120,24 +140,24 @@ async function main () {
   await sleep(3000) // let the world settle and the op status arrive
   bot.chat('/gamemode creative')
 
-  await command('/di reload', 'Reloaded configuration successfully')
+  await command('/di reload', papi ? 'Reloaded configuration successfully! true' : 'Reloaded configuration successfully')
 
   bot.chat('/summon pig ~3 ~ ~ {NoAI:1b,Tags:["dibot"]}')
   bot.chat('/summon cow ~-3 ~ ~ {NoAI:1b,Tags:["dibot"]}')
   await sleep(1500)
 
   let before = new Set(texts.keys())
-  bot.chat('/damage @e[type=pig,tag=dibot,limit=1] 1')
+  hit('pig', 1)
   await sleep(2000)
   const pigText = newTexts(before)
   if (pigText.length) return finish(1, `FAIL the blacklisted pig got text: ${JSON.stringify(pigText)}`)
   console.log('ok   no text for the blacklisted pig')
 
   before = new Set(texts.keys())
-  bot.chat('/damage @e[type=cow,tag=dibot,limit=1] 3')
+  hit('cow', 3)
   const damage = await waitFor(newText(before, '-3'), 8000)
   if (!damage) return finish(1, `FAIL no damage text (saw: ${JSON.stringify(shown())})`)
-  if (damage[1] !== '-3❤ [7❤]') return finish(1, `FAIL unexpected damage text: ${damage[1]}`)
+  if (damage[1] !== '-3❤ [7❤]' + suffix) return finish(1, `FAIL unexpected damage text: ${damage[1]}`)
   console.log(`ok   ${damage[1]}`)
 
   before = new Set(texts.keys())
@@ -153,7 +173,9 @@ async function main () {
   console.log('ok   the text was removed again')
 
   // The cow has 10 health. Two hits of 1 while the numbers are off, so turning them on shows "[7❤]".
+  await expectStatus('ON')
   await command('/di', 'now off')
+  await expectStatus('OFF')
   await expectNoTextForDamage('after turning numbers off with /di')
 
   await leave()
@@ -161,17 +183,20 @@ async function main () {
   console.log('ok   left and joined again')
   await sleep(2000)
   await expectNoTextForDamage('after rejoining (the choice was saved)')
+  await expectStatus('OFF')
 
   await command('/di', 'now on')
+  await expectStatus('ON')
   before = new Set(texts.keys())
-  bot.chat('/damage @e[type=cow,tag=dibot,limit=1] 1')
+  hit('cow', 1)
   const again = await waitFor(newText(before, '-1'), 8000)
   if (!again) return finish(1, `FAIL no damage text after turning numbers back on (saw: ${JSON.stringify(shown())})`)
-  if (again[1] !== '-1❤ [7❤]') return finish(1, `FAIL unexpected damage text: ${again[1]}`)
+  if (again[1] !== '-1❤ [7❤]' + suffix) return finish(1, `FAIL unexpected damage text: ${again[1]}`)
   console.log(`ok   ${again[1]}`)
 
   await leave()
-  finish(0, 'PASS /di reload, blacklist, damage and heal text, removal, and turning numbers off and on with /di work for a player')
+  finish(0, 'PASS /di reload, blacklist, damage and heal text, removal, and turning numbers off and on with /di work for a player'
+    + (papi ? ', with PlaceholderAPI placeholders' : ''))
 }
 
 main().catch(error => finish(1, `FAIL ${error.stack || error}`))

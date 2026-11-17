@@ -30,6 +30,8 @@ moment, with its health left. When it heals, the amount healed shows in another 
 - **Adjustable**: how long the text stays, its size, where it appears, whole numbers or decimals.
 - **Blacklist** for mobs that shouldn't show numbers (players by default).
 - **Players choose**: anyone can turn the numbers off or back on for themselves with `/di`, and it's remembered.
+- **[PlaceholderAPI](https://hangar.papermc.io/HelpChat/PlaceholderAPI)** (optional): placeholders for scoreboards and
+  menus, and other plugins' placeholders in the text and messages.
 - **Respects protection**: no numbers when another plugin cancels the damage, such as WorldGuard regions.
 - **Lightweight**: one short-lived text entity per hit, never saved with the world.
 
@@ -84,6 +86,28 @@ Run `/di reload` after changing anything. If a setting has a value the plugin do
 | `/di reload` | `damageindicator.reload` | operators | Reloads the config and messages. |
 
 `/damageindicator` works too.
+
+## PlaceholderAPI
+
+DamageIndicator works without [PlaceholderAPI](https://hangar.papermc.io/HelpChat/PlaceholderAPI). With it
+installed, you also get:
+
+**DamageIndicator's placeholders**, for scoreboards, tab lists, menus and so on:
+
+| Placeholder | Shows |
+|---|---|
+| `%damageindicator_shown%` | `true` or `false`: whether the player sees the numbers |
+| `%damageindicator_status%` | `ON` or `OFF` in colour (change the words in `translations/<language>.properties`) |
+
+Both are empty for players who aren't online.
+
+**Other plugins' placeholders in the damage text and in messages.** Put them in `text-format` or in the
+messages file, like `<red>-{damage}❤ <gray>by %player_name%`:
+- In the damage text, they're filled in for the player who hit the mob (also with arrows). When no player
+  did (a fall, a zombie, healing), placeholders about a player are left empty.
+- In `/di` messages, they're filled in for the player who ran the command.
+- Colour codes in placeholder values (`§a`, hex colours) show as colours. MiniMessage tags in values (from a
+  nickname, say) are shown as typed, so they can't change the rest of the text.
 
 ## FAQ
 

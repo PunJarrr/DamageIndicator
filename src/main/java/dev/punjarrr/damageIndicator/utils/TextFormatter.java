@@ -1,7 +1,9 @@
 package dev.punjarrr.damageIndicator.utils;
 
+import dev.punjarrr.damageIndicator.placeholders.Placeholders;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.entity.Player;
 
 public class TextFormatter {
 
@@ -10,11 +12,12 @@ public class TextFormatter {
     static final String DEFAULT_DAMAGE = "<red>-{damage}❤ <aqua>[{current}❤]";
     static final String DEFAULT_HEAL = "<green>+{heal}❤ <aqua>[{current}❤]";
 
-    public static Component formatDamage(double damage, double current, double max) {
+    /** @param attacker the player who caused the damage, for PlaceholderAPI placeholders, or null */
+    public static Component formatDamage(double damage, double current, double max, Player attacker) {
         return format(
                 Config.getString("settings.text-format.damage", DEFAULT_DAMAGE),
                 Config.getString("settings.number-format", "int"),
-                damage, 0, current, max
+                damage, 0, current, max, attacker
         );
     }
 
@@ -22,17 +25,22 @@ public class TextFormatter {
         return format(
                 Config.getString("settings.text-format.heal", DEFAULT_HEAL),
                 Config.getString("settings.number-format", "int"),
-                0, heal, current, max
+                0, heal, current, max, null
         );
     }
 
     static Component format(String raw, String numberFormat, double damage, double heal, double current, double max) {
+        return format(raw, numberFormat, damage, heal, current, max, null);
+    }
+
+    static Component format(String raw, String numberFormat, double damage, double heal, double current, double max,
+                            Player player) {
         String text = raw
                 .replace("{damage}", formatNumber(damage, numberFormat))
                 .replace("{heal}", formatNumber(heal, numberFormat))
                 .replace("{current}", formatNumber(current, numberFormat))
                 .replace("{max}", formatNumber(max, numberFormat));
-        return MINI_MESSAGE.deserialize(text);
+        return MINI_MESSAGE.deserialize(Placeholders.apply(player, text));
     }
 
     static String formatNumber(double value, String format) {

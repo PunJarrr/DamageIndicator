@@ -56,6 +56,12 @@ public final class PlayerToggle {
         return sees(ONLINE.getOrDefault(player.getUniqueId(), Choice.NOT_CHOSEN), showByDefault);
     }
 
+    /** Whether an online player sees the numbers, or null if they aren't online. Safe from any thread. */
+    public static Boolean sees(UUID player) {
+        Choice choice = ONLINE.get(player);
+        return choice == null ? null : sees(choice, showByDefault);
+    }
+
     static boolean sees(Choice choice, boolean byDefault) {
         return switch (choice) {
             case ON -> true;

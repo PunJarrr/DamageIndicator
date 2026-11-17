@@ -3,6 +3,7 @@ package dev.punjarrr.damageIndicator;
 import dev.punjarrr.damageIndicator.commands.DamageIndicatorCommand;
 import dev.punjarrr.damageIndicator.listeners.HealthChangeListener;
 import dev.punjarrr.damageIndicator.listeners.PlayerConnectionListener;
+import dev.punjarrr.damageIndicator.placeholders.Placeholders;
 import dev.punjarrr.damageIndicator.platform.Tasks;
 import dev.punjarrr.damageIndicator.platform.TextBridge;
 import dev.punjarrr.damageIndicator.utils.BlacklistedEntities;
@@ -26,6 +27,7 @@ public final class DamageIndicator extends JavaPlugin {
         Language.init();
         BlacklistedEntities.reload();
         PlayerToggle.init(this);
+        Placeholders.init(this);
 
         textBridge = TextBridge.detect();
         tasks = Tasks.detect(this);
@@ -42,7 +44,9 @@ public final class DamageIndicator extends JavaPlugin {
     }
 
     @Override
-    public void onDisable() {}
+    public void onDisable() {
+        Placeholders.shutdown();
+    }
 
     public static DamageIndicator getInstance() {
         return instance;

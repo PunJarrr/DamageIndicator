@@ -14,6 +14,7 @@ Ever wondered exactly how hard that sword hit?
 [*][B]Adjustable:[/B] how long the text stays, its size, where it appears, whole numbers or decimals
 [*][B]Blacklist[/B] for mobs that shouldn't show numbers (players by default)
 [*][B]Players choose:[/B] anyone can turn the numbers off or back on for themselves with [FONT=Courier New]/di[/FONT], and it's remembered
+[*][B]PlaceholderAPI[/B] (optional): placeholders for scoreboards and menus, and other plugins' placeholders in the text
 [*][B]Respects protection:[/B] no numbers when WorldGuard or another plugin cancels the damage
 [*][B]Spigot, Paper, Purpur and Folia[/B], Minecraft [B]1.19.4 – 26.3[/B], one jar for all of them
 [*][B]Lightweight:[/B] one short-lived text entity per hit, never saved with the world
@@ -122,6 +123,14 @@ config-version: 1.2.0[/CODE]
 [*][FONT=Courier New]/di[/FONT] ([FONT=Courier New]damageindicator.toggle[/FONT], everyone): turn damage numbers off or back on, just for you. Remembered across logins.
 [*][FONT=Courier New]/di reload[/FONT] ([FONT=Courier New]damageindicator.reload[/FONT], operators): reload the config and messages
 [/LIST]
+
+[SIZE=5][B]🧩 PlaceholderAPI[/B][/SIZE]
+Optional. With [URL='https://www.spigotmc.org/resources/6245/']PlaceholderAPI[/URL] installed:
+[LIST]
+[*][FONT=Courier New]%damageindicator_shown%[/FONT]: [FONT=Courier New]true[/FONT] or [FONT=Courier New]false[/FONT], whether the player sees the numbers
+[*][FONT=Courier New]%damageindicator_status%[/FONT]: ON or OFF in colour (change the words in the messages file)
+[/LIST]
+Other plugins' placeholders also work in the damage text (filled in for the player who hit the mob, like [FONT=Courier New]%player_name%[/FONT]) and in messages.
 
 [SPOILER="❓ FAQ"]
 [B]I'm updating from an older version. Do I lose my settings?[/B]

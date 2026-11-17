@@ -69,6 +69,10 @@ takes a few minutes.
    kept, the new default text, the new `show-numbers-by-default` option, and a backup in `backup/`.
 8. (test bot only) after `/di`, the bot gets no text when the cow is hit, also after leaving and joining
    again, and after `/di` once more it gets `-1❤ [7❤]`.
+9. PlaceholderAPI: every test server gets it, except paper-1.20.6, folia-1.21.11 and spigot-1.21.11, which
+   check the plugin works without it. With it, the plugin must hook in, and the bot checks
+   `%damageindicator_status%` in the damage text (`-3❤ [7❤] ON`), `%damageindicator_shown%` in the
+   `/di reload` message, and `/papi parse me %damageindicator_status%` before and after `/di`.
 
 Checks 2 – 5 run twice: over RCON (the server console), and as a test bot
 ([Mineflayer](https://github.com/PrismarineJS/mineflayer), in `tools/smoke-bot/`) that joins as a player
@@ -128,6 +132,10 @@ The smoke test can't see the text or check every setting. Before a release, join
       `/di` turns them on for them. Players who already chose keep their choice.
 - [ ] `/di` in the server console says only players can turn numbers on or off.
 - [ ] With `damageindicator.toggle` taken away (e.g. with LuckPerms), `/di` says you don't have permission.
+- [ ] With PlaceholderAPI (the test servers have it): `/papi ecloud download Player`, `/papi reload`, then
+      set the damage text to `<red>-{damage}❤ <gray>%player_name%`, `/di reload`. Hitting a mob shows your
+      name; a mob hurt by something else (fall, `/damage` from the console) shows the text without a name.
+- [ ] A scoreboard or menu plugin showing `%damageindicator_status%` switches between ON and OFF with `/di`.
 
 ## Pull requests
 

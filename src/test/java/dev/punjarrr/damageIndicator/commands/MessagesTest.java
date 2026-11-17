@@ -19,7 +19,8 @@ class MessagesTest {
             messages.load(new InputStreamReader(in, StandardCharsets.UTF_8));
         }
         for (String key : List.of("command.no-permission", "command.usage", "command.players-only",
-                "command.toggle.on", "command.toggle.off", "command.reload.success", "command.reload.failed")) {
+                "command.toggle.on", "command.toggle.off", "command.reload.success", "command.reload.failed",
+                "placeholder.status.on", "placeholder.status.off")) {
             assertNotNull(messages.getProperty(key), key);
         }
     }
