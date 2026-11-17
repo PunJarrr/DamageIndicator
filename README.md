@@ -66,6 +66,7 @@ that's when Minecraft added the floating text entities the plugin uses.
 | `settings.text-location.vertical-offset` | `0.5` | How far above the mob's head the text appears, in blocks. |
 | `settings.text-location.radius` | `0.5` | How far to the side the text may appear, in blocks, so numbers don't stack. |
 | `settings.blacklisted-entities` | `[PLAYER]` | [Entity types](https://hub.spigotmc.org/javadocs/spigot/org/bukkit/entity/EntityType.html) that never show numbers. Armor stands never do. |
+| `settings.hide-own-indicators` | `true` | When players aren't blacklisted, hides the numbers for damage and healing a player receives from that player's own screen. Other players still see them. |
 
 Placeholders for the text: `{damage}` (damage taken), `{heal}` (health gained), `{current}` (health after
 the change) and `{max}` (maximum health).
@@ -93,7 +94,8 @@ you get the new default, which has a space before the health (`-5❤ [15❤]`).
 Yes, from version 1.1.0. Paper and Purpur are supported too.
 
 **Can I see numbers when players get hurt?**
-Yes. Remove `PLAYER` from `blacklisted-entities` and run `/di reload`.
+Yes. Remove `PLAYER` from `blacklisted-entities` and run `/di reload`. Players don't see the numbers for
+their own damage and healing unless you also set `hide-own-indicators` to `false`.
 
 **Will it leave floating text behind if the server crashes?**
 No. From 1.1.0, the text is never saved with the world, so it can't get stuck. If an older version left
