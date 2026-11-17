@@ -4,6 +4,8 @@ import dev.punjarrr.damageIndicator.DamageIndicator;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.Display;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.util.Transformation;
 import org.joml.AxisAngle4f;
@@ -11,7 +13,7 @@ import org.joml.Vector3f;
 
 public class TextDisplaySpawner {
 
-    public static void spawn(Location location, Component text) {
+    public static void spawn(Location location, Component text, Entity damagedEntity) {
         DamageIndicator plugin = DamageIndicator.getInstance();
         int duration = Config.getInt("settings.display-duration", 10);
         float scale = (float) Config.getDouble("settings.text-display.scale", 1.0);
@@ -22,6 +24,9 @@ public class TextDisplaySpawner {
         TextDisplay display = location.getWorld().spawn(location, TextDisplay.class);
         // Never saved with the world, so a stop or chunk unload before removal can't leave text behind
         display.setPersistent(false);
+        if (damagedEntity instanceof Player player && Config.getBoolean("settings.hide-own-indicators", true)) {
+            player.hideEntity(plugin, display);
+        }
         // Scheduled first, so the text is removed even if a setup step below fails
         plugin.tasks().runLater(display, display::remove, duration);
 
