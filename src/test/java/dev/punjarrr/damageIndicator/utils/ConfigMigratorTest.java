@@ -257,6 +257,8 @@ class ConfigMigratorTest {
         assertEquals(10, config.getInt("settings.display-duration"));
         assertEquals(List.of("PLAYER"), config.getStringList("settings.blacklisted-entities"));
         assertTrue(config.getBoolean("settings.show-numbers-by-default"));
+        assertTrue(config.getBoolean("settings.hide-own-indicators"));
+        assertEquals(1, config.getInt("settings.decimal-places"));
         assertEquals(List.of(), Config.problems(config));
     }
 
@@ -266,11 +268,15 @@ class ConfigMigratorTest {
         config.set("settings.text-display.billboard", "CENTRE");
         config.set("settings.number-format", "decimal");
         config.set("settings.show-numbers-by-default", "maybe");
-        assertEquals(3, Config.problems(config).size());
+        config.set("settings.hide-own-indicators", "yes please");
+        config.set("settings.decimal-places", -2);
+        assertEquals(5, Config.problems(config).size());
 
         config.set("settings.text-display.billboard", "horizontal");
         config.set("settings.number-format", "DOUBLE");
         config.set("settings.show-numbers-by-default", false);
+        config.set("settings.hide-own-indicators", false);
+        config.set("settings.decimal-places", 3);
         assertEquals(List.of(), Config.problems(config));
     }
 

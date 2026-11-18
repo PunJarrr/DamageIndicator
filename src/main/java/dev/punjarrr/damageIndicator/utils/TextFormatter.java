@@ -5,12 +5,16 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.entity.Player;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class TextFormatter {
 
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
     static final String DEFAULT_DAMAGE = "<red>-{damage}❤ <aqua>[{current}❤]";
     static final String DEFAULT_HEAL = "<green>+{heal}❤ <aqua>[{current}❤]";
+    static final int MAX_DECIMAL_PLACES = 10;
 
     /** @param attacker the player who caused the damage, for PlaceholderAPI placeholders, or null */
     public static Component formatDamage(double damage, double current, double max, Player attacker) {
@@ -47,14 +51,15 @@ public class TextFormatter {
 
     static String formatNumber(double value, String format, int decimalPlaces) {
         if ("double".equalsIgnoreCase(format)) {
-            double smallestShown = Math.pow(10, -decimalPlaces);
-            if (value > 0 && value < smallestShown) value = smallestShown;
-            double scale = Math.pow(10, decimalPlaces);
-            double rounded = Math.round(value * scale) / scale;
-            if (rounded == (int) rounded) {
-                return String.valueOf((int) rounded);
-            }
-            return String.valueOf(rounded);
+            if (!Double.isFinite(value)) return String.valueOf(value);
+            // Exact decimal rounding, so 0.0004 never shows as 4.0E-4 and 3.4000004 shows as 3.4
+            int places = Math.min(decimalPlaces, MAX_DECIMAL_PLACES);
+            BigDecimal smallestShown = BigDecimal.ONE.movePointLeft(places);
+            BigDecimal number = BigDecimal.valueOf(value);
+            // A tiny hit never shows as 0, as with int
+            if (value > 0 && number.compareTo(smallestShown) < 0) number = smallestShown;
+            BigDecimal rounded = number.setScale(places, RoundingMode.HALF_UP).stripTrailingZeros();
+            return rounded.signum() == 0 ? "0" : rounded.toPlainString();
         }
         int intVal = (int) value;
         if (intVal == 0 && value > 0) intVal = 1;

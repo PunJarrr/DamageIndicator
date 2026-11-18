@@ -48,6 +48,16 @@ class TextFormatterTest {
     }
 
     @Test
+    void doubleFormatNeverUsesScientificNotationOrTrailingZeros() {
+        assertEquals("0.0004", TextFormatter.formatNumber(0.0004, "double", 4));
+        assertEquals("0.0001", TextFormatter.formatNumber(0.00001, "double", 4), "a tiny hit never shows as 0");
+        assertEquals("2.5", TextFormatter.formatNumber(2.5, "double", 3));
+        assertEquals("12345678901", TextFormatter.formatNumber(12345678901.0, "double", 1), "no overflow");
+        assertEquals("0", TextFormatter.formatNumber(0, "double", 2));
+        assertEquals("NaN", TextFormatter.formatNumber(Double.NaN, "double", 2));
+    }
+
+    @Test
     void unknownFormatFallsBackToInt() {
         assertEquals("5", TextFormatter.formatNumber(5.25, "fraction", 2));
     }
