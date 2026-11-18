@@ -92,6 +92,12 @@ public final class ConfigMigrator {
                 if (sameValue(value, defaults.get(path))) continue; // already the default, keep the template's line
                 values.put(path, value);
             }
+            // A list emptied by deleting its items (e.g. "blacklisted-entities:" with nothing under it) reads as
+            // "not set", so it would get the default items back. Keep it empty instead.
+            String oldText = Files.readString(file.toPath(), StandardCharsets.UTF_8).replace("\r\n", "\n");
+            for (String path : keysWithoutValue(oldText)) {
+                if (defaults.isList(path)) values.put(path, List.of());
+            }
 
             String updated = render(template, values);
             // Check the result before replacing anything: it must read back with exactly the kept values
@@ -150,10 +156,13 @@ public final class ConfigMigrator {
                 continue;
             }
 
-            out.add(line);
             // key: followed by "- item" lines is a list; anything else is a section
             int next = i + 1;
             boolean isList = next < lines.size() && LIST_ITEM.matcher(lines.get(next)).matches();
+            Object listValue = isList ? values.get(fullPath) : null;
+            boolean emptyList = listValue instanceof List<?> list && list.isEmpty();
+            // An empty list is written as "key: []", since "key:" alone would read as "not set"
+            out.add(emptyList ? key.group(1) + key.group(2) + ": []" : line);
             if (isList) {
                 String itemIndent = key.group(1) + "  ";
                 Matcher firstItem = LIST_ITEM.matcher(lines.get(next));
@@ -172,6 +181,44 @@ public final class ConfigMigrator {
             }
         }
         return String.join("\n", out);
+    }
+
+    /**
+     * Keys written with nothing after the colon and nothing under them, such as a list whose items were all
+     * deleted or commented out. (YAML reads them as "not set", so they don't show up in the loaded config.)
+     */
+    static List<String> keysWithoutValue(String text) {
+        List<String> lines = List.of(text.split("\n", -1));
+        List<String> found = new ArrayList<>();
+        List<String> path = new ArrayList<>();
+        for (int i = 0; i < lines.size(); i++) {
+            Matcher key = KEY_LINE.matcher(lines.get(i));
+            if (lines.get(i).trim().startsWith("#") || !key.matches()) continue;
+            int indent = key.group(1).length();
+            while (path.size() > indent / 2) path.remove(path.size() - 1);
+            path.add(key.group(2));
+            String rest = key.group(3).trim();
+            if (!rest.isEmpty() && !rest.startsWith("#")) {
+                path.remove(path.size() - 1); // has a value on the same line
+                continue;
+            }
+            // The next line that isn't blank or a comment: an item or a deeper key means it has a value
+            int next = i + 1;
+            while (next < lines.size() && (lines.get(next).isBlank() || lines.get(next).trim().startsWith("#"))) next++;
+            boolean hasChildren = next < lines.size() && (LIST_ITEM.matcher(lines.get(next)).matches()
+                    || leadingSpaces(lines.get(next)) > indent);
+            if (!hasChildren) {
+                found.add(String.join(".", path));
+                path.remove(path.size() - 1);
+            }
+        }
+        return found;
+    }
+
+    private static int leadingSpaces(String line) {
+        int count = 0;
+        while (count < line.length() && line.charAt(count) == ' ') count++;
+        return count;
     }
 
     /** A YAML value: numbers and true/false as they are, everything else as a double-quoted string. */

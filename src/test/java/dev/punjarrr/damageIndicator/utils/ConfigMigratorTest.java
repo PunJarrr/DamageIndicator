@@ -137,6 +137,55 @@ class ConfigMigratorTest {
     }
 
     @Test
+    void aBlacklistEmptiedByDeletingItsItemsStaysEmpty(@TempDir Path dir) throws Exception {
+        Files.writeString(dir.resolve("config.yml"), config1_1_0().replace("    - PLAYER\n", ""));
+
+        assertTrue(migrate(dir));
+
+        String updated = Files.readString(dir.resolve("config.yml"));
+        assertTrue(updated.contains("\n  blacklisted-entities: []\n"), "written so it reads back as empty");
+        assertEquals(List.of(), load(dir.resolve("config.yml")).getStringList("settings.blacklisted-entities"));
+    }
+
+    @Test
+    void aBlacklistWithItsItemsCommentedOutStaysEmpty(@TempDir Path dir) throws Exception {
+        Files.writeString(dir.resolve("config.yml"), config1_1_0().replace("    - PLAYER\n", "    # - PLAYER\n"));
+
+        assertTrue(migrate(dir));
+
+        assertEquals(List.of(), load(dir.resolve("config.yml")).getStringList("settings.blacklisted-entities"));
+    }
+
+    @Test
+    void anEmptyBlacklistWrittenAsBracketsStaysEmpty(@TempDir Path dir) throws Exception {
+        Files.writeString(dir.resolve("config.yml"),
+                config1_1_0().replace("  blacklisted-entities:\n    - PLAYER\n", "  blacklisted-entities: []\n"));
+
+        assertTrue(migrate(dir), "1.1.0 gave up on this file and left it as it was");
+
+        assertEquals(List.of(), load(dir.resolve("config.yml")).getStringList("settings.blacklisted-entities"));
+    }
+
+    @Test
+    void keysWithoutValueAreFound() {
+        String text = """
+                settings:
+                  language: en_US
+                  empty-list:
+                  # a comment
+                  commented-list:
+                    # - PLAYER
+                  section:
+                    inner: 1
+                  list:
+                    - A
+                  last:
+                """;
+        assertEquals(List.of("settings.empty-list", "settings.commented-list", "settings.last"),
+                ConfigMigrator.keysWithoutValue(text));
+    }
+
+    @Test
     void aConfigWithoutAVersionIsTreatedAs1_0_0(@TempDir Path dir) throws Exception {
         Files.writeString(dir.resolve("config.yml"), "settings:\n  display-duration: 40\n");
 
