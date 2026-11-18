@@ -56,6 +56,11 @@ settings:
   blacklisted-entities:
     - PLAYER
 
+  # When players aren't in blacklisted-entities, hide the indicators of damage and healing a player
+  # receives from that player's own screen, so you never see your own numbers (other players still do).
+  # Options: true, false
+  hide-own-indicators: true
+
   # Whether players see the numbers before they've turned them on or off themselves with /di.
   # Each player's own choice is saved, and is kept even if this changes.
   # Options: true (players turn them off with /di), false (players turn them on with /di)

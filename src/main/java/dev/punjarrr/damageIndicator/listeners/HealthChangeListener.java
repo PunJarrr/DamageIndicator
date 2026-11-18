@@ -36,7 +36,7 @@ public class HealthChangeListener implements Listener {
         Location textLocation = TextLocation.getTextLocation(getTopHitbox(livingEntity));
         Component text = TextFormatter.formatDamage(damage, current, max, attacker(event));
 
-        TextDisplaySpawner.spawn(textLocation, text);
+        TextDisplaySpawner.spawn(textLocation, text, livingEntity);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -53,7 +53,7 @@ public class HealthChangeListener implements Listener {
         Location textLocation = TextLocation.getTextLocation(getTopHitbox(livingEntity));
         Component text = TextFormatter.formatHeal(heal, current, max);
 
-        TextDisplaySpawner.spawn(textLocation, text);
+        TextDisplaySpawner.spawn(textLocation, text, livingEntity);
     }
 
     /** The player who caused the damage (also with an arrow, trident, ...), for placeholders, or null. */
