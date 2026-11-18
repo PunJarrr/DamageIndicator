@@ -30,6 +30,9 @@ settings:
   # Options: int (whole numbers, rounded down, e.g. 5), double (decimals, e.g. 5.25)
   number-format: int
 
+  # The most decimals shown when number-format is double (e.g. 2 gives 5.25).
+  decimal-places: 1
+
   # Settings for the text display entity.
   text-display:
     # The scale of the text display (1.0 = default size).
