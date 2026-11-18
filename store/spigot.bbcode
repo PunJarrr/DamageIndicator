@@ -11,7 +11,7 @@ Ever wondered exactly how hard that sword hit?
 [*][B]Damage[/B] above the mob's head, like [FONT=Courier New]-5❤ [15❤][/FONT]
 [*][B]Healing[/B] in another colour, like [FONT=Courier New]+4❤ [19❤][/FONT]
 [*][B]Your own text[/B] with colours, gradients and formatting ([URL='https://docs.papermc.io/adventure/minimessage/format/']MiniMessage[/URL]), and the placeholders [FONT=Courier New]{damage}[/FONT], [FONT=Courier New]{heal}[/FONT], [FONT=Courier New]{current}[/FONT], [FONT=Courier New]{max}[/FONT]
-[*][B]Adjustable:[/B] how long the text stays, its size, where it appears, whole numbers or decimals
+[*][B]Adjustable:[/B] how long the text stays, its size, where it appears, whole numbers or decimals (and how many)
 [*][B]Blacklist[/B] for mobs that shouldn't show numbers (players by default)
 [*][B]Players choose:[/B] anyone can turn the numbers off or back on for themselves with [FONT=Courier New]/di[/FONT], and it's remembered
 [*][B]PlaceholderAPI[/B] (optional): placeholders for scoreboards and menus, and other plugins' placeholders in the text
@@ -85,6 +85,9 @@ settings:
   # Options: int (whole numbers, rounded down, e.g. 5), double (decimals, e.g. 5.25)
   number-format: int
 
+  # The most decimals shown when number-format is double (e.g. 2 gives 5.25).
+  decimal-places: 1
+
   # Settings for the text display entity.
   text-display:
     # The scale of the text display (1.0 = default size).
@@ -107,6 +110,11 @@ settings:
   # Armor stands never show indicators.
   blacklisted-entities:
     - PLAYER
+
+  # When players aren't in blacklisted-entities, hide the indicators of damage and healing a player
+  # receives from that player's own screen, so you never see your own numbers (other players still do).
+  # Options: true, false
+  hide-own-indicators: true
 
   # Whether players see the numbers before they've turned them on or off themselves with /di.
   # Each player's own choice is saved, and is kept even if this changes.
@@ -143,7 +151,7 @@ Yes, from 1.1.0. Paper and Purpur work too.
 Yes, from 1.2.0. Each player types [FONT=Courier New]/di[/FONT] to turn them off or back on, and it's remembered across logins and restarts. To start with them off for everyone, set [FONT=Courier New]show-numbers-by-default: false[/FONT]. To stop players turning them off, take away [FONT=Courier New]damageindicator.toggle[/FONT].
 
 [B]Can I see numbers when players get hurt?[/B]
-Yes. Remove [FONT=Courier New]PLAYER[/FONT] from [FONT=Courier New]blacklisted-entities[/FONT] and run [FONT=Courier New]/di reload[/FONT].
+Yes. Remove [FONT=Courier New]PLAYER[/FONT] from [FONT=Courier New]blacklisted-entities[/FONT] and run [FONT=Courier New]/di reload[/FONT]. Players don't see the numbers for their own damage and healing, unless you set [FONT=Courier New]hide-own-indicators: false[/FONT].
 
 [B]Will it leave floating text behind if the server crashes?[/B]
 No. From 1.1.0, the text is never saved with the world, so it can't get stuck.

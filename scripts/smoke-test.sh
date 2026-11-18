@@ -8,6 +8,7 @@
 #   - an old (1.0.0) config.yml is updated, with its settings kept and a backup saved
 #   - (bot only) a player who turns the numbers off with /di gets none, also after rejoining, until they turn
 #     them back on; the server has an old (1.1.0) messages file, so the new /di messages must come from the jar
+#   - (bot only) a player hurting itself doesn't see its own number, though one is made (hide-own-indicators)
 #   - PlaceholderAPI: most servers have it, and the bot checks %damageindicator_status% in the damage text, in
 #     a message and with /papi parse. A few servers run without it, to check the plugin works either way.
 # These run over RCON (the server console), and again as a test bot player that checks the text it receives.
@@ -154,6 +155,9 @@ for T in "${TARGETS[@]}"; do
     poll "indicator did not disappear" 'Test failed' 20 "execute if entity @e[type=text_display]"
     fi
 
+    # For the bot (its /di reload picks these up): players aren't blacklisted, so the bot can check that it
+    # doesn't see the numbers for its own damage (hide-own-indicators)
+    sed -i.bak '/^    - PLAYER$/d' "$CONFIG"; rm -f "$CONFIG.bak"
     if [ "$PAPI" = true ]; then
       # The bot's /di reload picks this up: the damage text gets the attacking player's %damageindicator_status%
       sed -i.bak 's/^    damage: "<red>-{damage}❤ <aqua>\[{current}❤\]"$/    damage: "<red>-{damage}❤ <aqua>[{current}❤] %damageindicator_status%"/' "$CONFIG"

@@ -13,12 +13,24 @@
     sees the numbers.
   - Other plugins' placeholders work in the damage and heal text (filled in for the player who hit the mob)
     and in messages (for the player who ran the command).
+- `hide-own-indicators` (on by default): when players aren't blacklisted, you don't see the numbers for your
+  own damage and healing; other players still do. By SamiraUrzua (#5).
+- `decimal-places` (default `1`): how many decimals `number-format: double` shows, so `3.4000004` shows as
+  `3.4`. By SamiraUrzua (#3).
 
 ### Changed
 - `/di` on its own now turns the numbers on or off. Before, it only showed the usage message, and only for
   operators.
 - `config.yml` is updated to the new layout automatically, with your settings kept.
 - Messages added in new versions show even if your `translations` file is from an older version.
+- With `number-format: double`, numbers are rounded to `decimal-places` (1 by default) instead of showing
+  every decimal.
+
+### Fixed
+- Deleting every entity from `blacklisted-entities` now really empties the list. Before, players stayed
+  blacklisted. By SamiraUrzua (#4).
+- Updating an older `config.yml` keeps an empty `blacklisted-entities` empty, instead of putting `PLAYER`
+  back. A list written as `[]` no longer stops the update.
 
 ## 1.1.0
 

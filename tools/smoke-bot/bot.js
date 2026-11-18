@@ -4,6 +4,8 @@
 //   3. hits a cow for 3 damage                                -> expects floating text "-3❤ [7❤]"
 //   4. heals the cow with Instant Health                      -> expects floating text "+4❤ [10❤]"
 //   5. waits                                                  -> expects all the text to be removed again
+//   5b. hurts itself (players aren't blacklisted here)       -> a number is made (execute finds it), but the
+//       bot isn't sent it (hide-own-indicators)
 //   6. runs /di, then hits the cow for 1                      -> expects "now off", and no floating text
 //   7. leaves and joins again, hits the cow for 1             -> still no floating text (the choice was saved)
 //   8. runs /di, then hits the cow for 1                      -> expects "now on", and "-1❤ [7❤]"
@@ -35,7 +37,11 @@ function plainText (component) {
   if (component.type && component.value !== undefined) component = nbt.simplify(component)
   if (typeof component !== 'object') return String(component)
   if (Array.isArray(component)) return component.map(plainText).join('')
-  const own = component.text !== undefined ? component.text : (component[''] !== undefined ? component[''] : '')
+  // The game's own replies (like "Test passed") are translation keys: keep the key and its values
+  const translated = component.translate !== undefined
+    ? [component.translate, ...(component.with || []).map(plainText)].join(' ')
+    : ''
+  const own = component.text !== undefined ? component.text : (component[''] !== undefined ? component[''] : translated)
   return String(own) + (component.extra || []).map(plainText).join('')
 }
 
@@ -172,6 +178,24 @@ async function main () {
   }
   console.log('ok   the text was removed again')
 
+  // hide-own-indicators: the bot hurts itself. A number is made (others would see it), but not sent to the bot.
+  bot.chat('/gamemode survival')
+  await sleep(1000)
+  const healthBefore = bot.health
+  let lowestHealth = healthBefore // it heals back quickly, so keep the lowest value seen
+  const onHealth = () => { lowestHealth = Math.min(lowestHealth, bot.health) }
+  bot.on('health', onHealth)
+  before = new Set(texts.keys())
+  await command('/damage @s 2', 'commands.damage.success')
+  await command('/execute if entity @e[type=text_display,distance=..6]', 'commands.execute.conditional.pass')
+  await sleep(1500)
+  const ownText = newTexts(before)
+  if (ownText.length) return finish(1, `FAIL the bot was sent its own number: ${JSON.stringify(ownText)}`)
+  bot.removeListener('health', onHealth)
+  if (!(lowestHealth < healthBefore)) return finish(1, `FAIL the bot took no damage (health stayed ${healthBefore})`)
+  console.log('ok   no number for the bot\'s own damage, though one was made for others')
+  bot.chat('/gamemode creative')
+
   // The cow has 10 health. Two hits of 1 while the numbers are off, so turning them on shows "[7❤]".
   await expectStatus('ON')
   await command('/di', 'now off')
@@ -195,7 +219,7 @@ async function main () {
   console.log(`ok   ${again[1]}`)
 
   await leave()
-  finish(0, 'PASS /di reload, blacklist, damage and heal text, removal, and turning numbers off and on with /di work for a player'
+  finish(0, 'PASS /di reload, blacklist, damage and heal text, removal, hiding your own number, and turning numbers off and on with /di work for a player'
     + (papi ? ', with PlaceholderAPI placeholders' : ''))
 }
 

@@ -69,7 +69,9 @@ takes a few minutes.
    kept, the new default text, the new `show-numbers-by-default` option, and a backup in `backup/`.
 8. (test bot only) after `/di`, the bot gets no text when the cow is hit, also after leaving and joining
    again, and after `/di` once more it gets `-1❤ [7❤]`.
-9. PlaceholderAPI: every test server gets it, except paper-1.20.6, folia-1.21.11 and spigot-1.21.11, which
+9. (test bot only) with `PLAYER` taken off the blacklist, the bot hurts itself: a number is made
+   (`execute if entity` finds it) but the bot isn't sent it (`hide-own-indicators`).
+10. PlaceholderAPI: every test server gets it, except paper-1.20.6, folia-1.21.11 and spigot-1.21.11, which
    check the plugin works without it. With it, the plugin must hook in, and the bot checks
    `%damageindicator_status%` in the damage text (`-3❤ [7❤] ON`), `%damageindicator_shown%` in the
    `/di reload` message, and `/papi parse me %damageindicator_status%` before and after `/di`.
@@ -136,6 +138,10 @@ The smoke test can't see the text or check every setting. Before a release, join
       set the damage text to `<red>-{damage}❤ <gray>%player_name%`, `/di reload`. Hitting a mob shows your
       name; a mob hurt by something else (fall, `/damage` from the console) shows the text without a name.
 - [ ] A scoreboard or menu plugin showing `%damageindicator_status%` switches between ON and OFF with `/di`.
+- [ ] Delete the `- PLAYER` line under `blacklisted-entities`, `/di reload`: hitting another player shows a
+      number to everyone but the player who was hit. With `hide-own-indicators: false`, they see it too.
+- [ ] Set `number-format: double` and `decimal-places: 2`, `/di reload`: numbers show at most 2 decimals,
+      without trailing zeros (`2.5`, not `2.50`).
 
 ## Pull requests
 
