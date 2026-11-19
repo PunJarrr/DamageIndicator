@@ -15,6 +15,12 @@ public interface Tasks {
 
     void runLater(Entity entity, Runnable task, long delayTicks);
 
+    /**
+     * Whether this thread may change {@code entity}. Always true, except on Folia, where each part of the world
+     * runs on its own thread. (Players in another part of the world can't see entities here anyway.)
+     */
+    boolean ownsHere(Entity entity);
+
     /** Shown in the startup log, and checked by the smoke test. */
     String description();
 
@@ -36,6 +42,11 @@ public interface Tasks {
         }
 
         @Override
+        public boolean ownsHere(Entity entity) {
+            return true;
+        }
+
+        @Override
         public String description() {
             return "the Bukkit scheduler";
         }
@@ -45,11 +56,13 @@ public interface Tasks {
         private final Plugin plugin;
         private final Method getScheduler;
         private final Method runDelayed;
+        private final Method isOwnedByCurrentRegion;
 
-        private FoliaTasks(Plugin plugin, Method getScheduler, Method runDelayed) {
+        private FoliaTasks(Plugin plugin, Method getScheduler, Method runDelayed, Method isOwnedByCurrentRegion) {
             this.plugin = plugin;
             this.getScheduler = getScheduler;
             this.runDelayed = runDelayed;
+            this.isOwnedByCurrentRegion = isOwnedByCurrentRegion;
         }
 
         static FoliaTasks tryCreate(Plugin plugin) {
@@ -58,9 +71,19 @@ public interface Tasks {
                 Method getScheduler = Entity.class.getMethod("getScheduler");
                 Method runDelayed = getScheduler.getReturnType()
                         .getMethod("runDelayed", Plugin.class, Consumer.class, Runnable.class, long.class);
-                return new FoliaTasks(plugin, getScheduler, runDelayed);
+                Method isOwnedByCurrentRegion = Bukkit.class.getMethod("isOwnedByCurrentRegion", Entity.class);
+                return new FoliaTasks(plugin, getScheduler, runDelayed, isOwnedByCurrentRegion);
             } catch (ReflectiveOperationException | LinkageError e) {
                 return null; // not Folia
+            }
+        }
+
+        @Override
+        public boolean ownsHere(Entity entity) {
+            try {
+                return (boolean) isOwnedByCurrentRegion.invoke(null, entity);
+            } catch (ReflectiveOperationException e) {
+                return false;
             }
         }
 

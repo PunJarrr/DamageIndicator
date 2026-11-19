@@ -92,6 +92,99 @@ class ConfigMigratorTest {
         assertEquals("th_TH", config.getString("settings.language"));
     }
 
+    private static String config1_1_0() throws Exception {
+        try (InputStream in = ConfigMigratorTest.class.getResourceAsStream("/config-1.1.0.yml")) {
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
+    }
+
+    @Test
+    void anUnchanged1_1_0ConfigGetsTheNewOptionAndBecomesTheNewDefaultFile(@TempDir Path dir) throws Exception {
+        Files.writeString(dir.resolve("config.yml"), config1_1_0());
+
+        assertTrue(migrate(dir));
+
+        String bundledText;
+        try (InputStream in = bundled()) {
+            bundledText = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        assertEquals(bundledText, Files.readString(dir.resolve("config.yml")));
+        assertTrue(load(dir.resolve("config.yml")).getBoolean("settings.show-numbers-by-default"));
+        File[] backups = backups(dir);
+        assertEquals(1, backups.length);
+        assertTrue(backups[0].getName().startsWith("config-1.1.0-"));
+    }
+
+    @Test
+    void aCustomised1_1_0ConfigKeepsItsSettingsAndGetsTheNewOption(@TempDir Path dir) throws Exception {
+        String custom = config1_1_0()
+                .replace("damage: \"<red>-{damage}❤ <aqua>[{current}❤]\"", "damage: \"<gold>{damage}\"")
+                .replace("display-duration: 10", "display-duration: 25")
+                .replace("scale: 1.0", "scale: 1.5")
+                .replace("    - PLAYER", "    - PLAYER\n    - PIG");
+        Files.writeString(dir.resolve("config.yml"), custom);
+
+        assertTrue(migrate(dir));
+
+        YamlConfiguration config = load(dir.resolve("config.yml"));
+        assertEquals("<gold>{damage}", config.getString("settings.text-format.damage"));
+        assertEquals(TextFormatter.DEFAULT_HEAL, config.getString("settings.text-format.heal"));
+        assertEquals(25, config.getInt("settings.display-duration"));
+        assertEquals(1.5, config.getDouble("settings.text-display.scale"));
+        assertEquals(List.of("PLAYER", "PIG"), config.getStringList("settings.blacklisted-entities"));
+        assertTrue(config.getBoolean("settings.show-numbers-by-default"));
+        assertEquals(ConfigMigrator.CURRENT_VERSION, config.getString("config-version"));
+    }
+
+    @Test
+    void aBlacklistEmptiedByDeletingItsItemsStaysEmpty(@TempDir Path dir) throws Exception {
+        Files.writeString(dir.resolve("config.yml"), config1_1_0().replace("    - PLAYER\n", ""));
+
+        assertTrue(migrate(dir));
+
+        String updated = Files.readString(dir.resolve("config.yml"));
+        assertTrue(updated.contains("\n  blacklisted-entities: []\n"), "written so it reads back as empty");
+        assertEquals(List.of(), load(dir.resolve("config.yml")).getStringList("settings.blacklisted-entities"));
+    }
+
+    @Test
+    void aBlacklistWithItsItemsCommentedOutStaysEmpty(@TempDir Path dir) throws Exception {
+        Files.writeString(dir.resolve("config.yml"), config1_1_0().replace("    - PLAYER\n", "    # - PLAYER\n"));
+
+        assertTrue(migrate(dir));
+
+        assertEquals(List.of(), load(dir.resolve("config.yml")).getStringList("settings.blacklisted-entities"));
+    }
+
+    @Test
+    void anEmptyBlacklistWrittenAsBracketsStaysEmpty(@TempDir Path dir) throws Exception {
+        Files.writeString(dir.resolve("config.yml"),
+                config1_1_0().replace("  blacklisted-entities:\n    - PLAYER\n", "  blacklisted-entities: []\n"));
+
+        assertTrue(migrate(dir), "1.1.0 gave up on this file and left it as it was");
+
+        assertEquals(List.of(), load(dir.resolve("config.yml")).getStringList("settings.blacklisted-entities"));
+    }
+
+    @Test
+    void keysWithoutValueAreFound() {
+        String text = """
+                settings:
+                  language: en_US
+                  empty-list:
+                  # a comment
+                  commented-list:
+                    # - PLAYER
+                  section:
+                    inner: 1
+                  list:
+                    - A
+                  last:
+                """;
+        assertEquals(List.of("settings.empty-list", "settings.commented-list", "settings.last"),
+                ConfigMigrator.keysWithoutValue(text));
+    }
+
     @Test
     void aConfigWithoutAVersionIsTreatedAs1_0_0(@TempDir Path dir) throws Exception {
         Files.writeString(dir.resolve("config.yml"), "settings:\n  display-duration: 40\n");
@@ -163,6 +256,9 @@ class ConfigMigratorTest {
         assertEquals(TextFormatter.DEFAULT_HEAL, config.getString("settings.text-format.heal"));
         assertEquals(10, config.getInt("settings.display-duration"));
         assertEquals(List.of("PLAYER"), config.getStringList("settings.blacklisted-entities"));
+        assertTrue(config.getBoolean("settings.show-numbers-by-default"));
+        assertTrue(config.getBoolean("settings.hide-own-indicators"));
+        assertEquals(1, config.getInt("settings.decimal-places"));
         assertEquals(List.of(), Config.problems(config));
     }
 
@@ -171,10 +267,16 @@ class ConfigMigratorTest {
         YamlConfiguration config = new YamlConfiguration();
         config.set("settings.text-display.billboard", "CENTRE");
         config.set("settings.number-format", "decimal");
-        assertEquals(2, Config.problems(config).size());
+        config.set("settings.show-numbers-by-default", "maybe");
+        config.set("settings.hide-own-indicators", "yes please");
+        config.set("settings.decimal-places", -2);
+        assertEquals(5, Config.problems(config).size());
 
         config.set("settings.text-display.billboard", "horizontal");
         config.set("settings.number-format", "DOUBLE");
+        config.set("settings.show-numbers-by-default", false);
+        config.set("settings.hide-own-indicators", false);
+        config.set("settings.decimal-places", 3);
         assertEquals(List.of(), Config.problems(config));
     }
 

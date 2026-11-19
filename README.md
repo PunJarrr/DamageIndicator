@@ -29,6 +29,9 @@ moment, with its health left. When it heals, the amount healed shows in another 
   and the placeholders `{damage}`, `{heal}`, `{current}` and `{max}`.
 - **Adjustable**: how long the text stays, its size, where it appears, whole numbers or decimals.
 - **Blacklist** for mobs that shouldn't show numbers (players by default).
+- **Players choose**: anyone can turn the numbers off or back on for themselves with `/di`, and it's remembered.
+- **[PlaceholderAPI](https://hangar.papermc.io/HelpChat/PlaceholderAPI)** (optional): placeholders for scoreboards and
+  menus, and other plugins' placeholders in the text and messages.
 - **Respects protection**: no numbers when another plugin cancels the damage, such as WorldGuard regions.
 - **Lightweight**: one short-lived text entity per hit, never saved with the world.
 
@@ -61,11 +64,14 @@ that's when Minecraft added the floating text entities the plugin uses.
 | `settings.text-format.heal` | `<green>+{heal}❤ <aqua>[{current}❤]` | The text shown when a mob is healed. |
 | `settings.display-duration` | `10` | How long the text stays, in ticks (20 ticks = 1 second). |
 | `settings.number-format` | `int` | `int` for whole numbers, rounded down (`5`), `double` for decimals (`5.25`). |
+| `settings.decimal-places` | `1` | The most decimals shown when `number-format` is `double` (`2` gives `5.25`). |
 | `settings.text-display.scale` | `1.0` | Text size (1.0 = normal). |
 | `settings.text-display.billboard` | `CENTER` | `CENTER` always faces the player, `VERTICAL` only turns sideways, `HORIZONTAL` only tilts up and down, `FIXED` never turns. |
 | `settings.text-location.vertical-offset` | `0.5` | How far above the mob's head the text appears, in blocks. |
 | `settings.text-location.radius` | `0.5` | How far to the side the text may appear, in blocks, so numbers don't stack. |
 | `settings.blacklisted-entities` | `[PLAYER]` | [Entity types](https://hub.spigotmc.org/javadocs/spigot/org/bukkit/entity/EntityType.html) that never show numbers. Armor stands never do. |
+| `settings.hide-own-indicators` | `true` | When players aren't blacklisted, hides the numbers for damage and healing a player receives from that player's own screen. Other players still see them. |
+| `settings.show-numbers-by-default` | `true` | Whether players see numbers before they've used `/di`. `false` means players turn them on with `/di` instead. Each player's own choice is kept either way. |
 
 Placeholders for the text: `{damage}` (damage taken), `{heal}` (health gained), `{current}` (health after
 the change) and `{max}` (maximum health).
@@ -78,9 +84,32 @@ Run `/di reload` after changing anything. If a setting has a value the plugin do
 
 | Command | Permission | Default | What it does |
 |---|---|---|---|
+| `/di` | `damageindicator.toggle` | everyone | Turns damage numbers off or back on, just for you. Remembered across logins and restarts. `/di toggle` does the same. |
 | `/di reload` | `damageindicator.reload` | operators | Reloads the config and messages. |
 
 `/damageindicator` works too.
+
+## PlaceholderAPI
+
+DamageIndicator works without [PlaceholderAPI](https://hangar.papermc.io/HelpChat/PlaceholderAPI). With it
+installed, you also get:
+
+**DamageIndicator's placeholders**, for scoreboards, tab lists, menus and so on:
+
+| Placeholder | Shows |
+|---|---|
+| `%damageindicator_shown%` | `true` or `false`: whether the player sees the numbers |
+| `%damageindicator_status%` | `ON` or `OFF` in colour (change the words in `translations/<language>.properties`) |
+
+Both are empty for players who aren't online.
+
+**Other plugins' placeholders in the damage text and in messages.** Put them in `text-format` or in the
+messages file, like `<red>-{damage}❤ <gray>by %player_name%`:
+- In the damage text, they're filled in for the player who hit the mob (also with arrows). When no player
+  did (a fall, a zombie, healing), placeholders about a player are left empty.
+- In `/di` messages, they're filled in for the player who ran the command.
+- Colour codes in placeholder values (`§a`, hex colours) show as colours. MiniMessage tags in values (from a
+  nickname, say) are shown as typed, so they can't change the rest of the text.
 
 ## FAQ
 
@@ -92,8 +121,15 @@ you get the new default, which has a space before the health (`-5❤ [15❤]`).
 **Does it work on Spigot and Folia?**
 Yes, from version 1.1.0. Paper and Purpur are supported too.
 
+**Can players turn the numbers off?**
+Yes, from 1.2.0. Each player types `/di` to turn them off or back on. The choice is saved with the player,
+so it's remembered across logins and restarts. To start with numbers off for everyone, set
+`show-numbers-by-default: false`. To stop players turning them off, take away the `damageindicator.toggle`
+permission.
+
 **Can I see numbers when players get hurt?**
-Yes. Remove `PLAYER` from `blacklisted-entities` and run `/di reload`.
+Yes. Remove `PLAYER` from `blacklisted-entities` and run `/di reload`. Players don't see the numbers for
+their own damage and healing unless you also set `hide-own-indicators` to `false`.
 
 **Will it leave floating text behind if the server crashes?**
 No. From 1.1.0, the text is never saved with the world, so it can't get stuck. If an older version left

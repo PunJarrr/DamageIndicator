@@ -65,8 +65,16 @@ takes a few minutes.
 5. the text is gone again after `display-duration`
 6. the server log has no errors (harmless known lines are listed in `scripts/smoke-test-ignore.txt`)
 7. an old config file is updated: each server starts with the `config.yml` from DamageIndicator 1.0.0
-   (`src/test/resources/config-1.0.0.yml`), which must come out as `config-version: 1.1.0` with its settings
-   kept, the new default text, and a backup in `backup/`.
+   (`src/test/resources/config-1.0.0.yml`), which must come out as `config-version: 1.2.0` with its settings
+   kept, the new default text, the new `show-numbers-by-default` option, and a backup in `backup/`.
+8. (test bot only) after `/di`, the bot gets no text when the cow is hit, also after leaving and joining
+   again, and after `/di` once more it gets `-1❤ [7❤]`.
+9. (test bot only) with `PLAYER` taken off the blacklist, the bot hurts itself: a number is made
+   (`execute if entity` finds it) but the bot isn't sent it (`hide-own-indicators`).
+10. PlaceholderAPI: every test server gets it, except paper-1.20.6, folia-1.21.11 and spigot-1.21.11, which
+   check the plugin works without it. With it, the plugin must hook in, and the bot checks
+   `%damageindicator_status%` in the damage text (`-3❤ [7❤] ON`), `%damageindicator_shown%` in the
+   `/di reload` message, and `/papi parse me %damageindicator_status%` before and after `/di`.
 
 Checks 2 – 5 run twice: over RCON (the server console), and as a test bot
 ([Mineflayer](https://github.com/PrismarineJS/mineflayer), in `tools/smoke-bot/`) that joins as a player
@@ -120,6 +128,20 @@ The smoke test can't see the text or check every setting. Before a release, join
 - [ ] Hit a mob, then stop the server within half a second (`stop`). After starting again, no text is
       left floating.
 - [ ] As a non-operator, `/di reload` says you don't have permission.
+- [ ] Type `/di` (as anyone): it says numbers are now off, and hitting a mob shows you nothing. A second
+      player nearby still sees the numbers. Rejoin: still off. `/di` again: back on.
+- [ ] Set `show-numbers-by-default: false`, `/di reload`: a player who never used `/di` sees no numbers, and
+      `/di` turns them on for them. Players who already chose keep their choice.
+- [ ] `/di` in the server console says only players can turn numbers on or off.
+- [ ] With `damageindicator.toggle` taken away (e.g. with LuckPerms), `/di` says you don't have permission.
+- [ ] With PlaceholderAPI (the test servers have it): `/papi ecloud download Player`, `/papi reload`, then
+      set the damage text to `<red>-{damage}❤ <gray>%player_name%`, `/di reload`. Hitting a mob shows your
+      name; a mob hurt by something else (fall, `/damage` from the console) shows the text without a name.
+- [ ] A scoreboard or menu plugin showing `%damageindicator_status%` switches between ON and OFF with `/di`.
+- [ ] Delete the `- PLAYER` line under `blacklisted-entities`, `/di reload`: hitting another player shows a
+      number to everyone but the player who was hit. With `hide-own-indicators: false`, they see it too.
+- [ ] Set `number-format: double` and `decimal-places: 2`, `/di reload`: numbers show at most 2 decimals,
+      without trailing zeros (`2.5`, not `2.50`).
 
 ## Pull requests
 

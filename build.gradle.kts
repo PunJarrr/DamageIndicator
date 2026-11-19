@@ -18,7 +18,12 @@ repositories {
     mavenCentral()
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
+    maven("https://repo.extendedclip.com/releases/") // PlaceholderAPI
 }
+
+// PlaceholderAPI is optional: compiled against, never bundled, and only used when the server has it.
+// The test servers get this version too (see "Test servers" below).
+val placeholderApiVersion = "2.12.3"
 
 dependencies {
     // Compile against the OLDEST and SMALLEST API we support: Spigot 1.19.4, the first version with text
@@ -34,6 +39,10 @@ dependencies {
         exclude(group = "com.google.code.gson") // every server already has Gson
     }
     implementation("net.kyori:adventure-text-serializer-legacy:4.26.1")
+
+    compileOnly("me.clip:placeholderapi:$placeholderApiVersion") {
+        isTransitive = false // only its API classes are needed to compile
+    }
 
     testImplementation("org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
     testImplementation("net.kyori:adventure-text-serializer-plain:4.26.1")
@@ -139,6 +148,9 @@ hangarPublish {
 //   ./gradlew runSpigot_1_21_11        -> Spigot 1.21.11 (built with BuildTools the first time, slow)
 //   ./gradlew -q printTestServers      -> every test server, used by scripts/smoke-test.sh
 //
+// Every test server also gets PlaceholderAPI. Add -PplaceholderApi=false to run one without it (the smoke
+// test does this for a few servers, to check the plugin works either way).
+//
 // The servers accept the Minecraft EULA (https://aka.ms/MinecraftEULA) in their run/ folders.
 // ---------------------------------------------------------------------------
 data class TestServer(val platform: String, val minecraftVersion: String) {
@@ -181,6 +193,7 @@ abstract class DownloadFile : DefaultTask() {
 val serverCache = layout.projectDirectory.dir("run/_servers")
 val testServerRoot = providers.gradleProperty("testServerRoot").orElse("run")
 val pluginJar = tasks.shadowJar.flatMap { it.archiveFile }
+val withPlaceholderApi = providers.gradleProperty("placeholderApi").map { it.toBoolean() }.orElse(true).get()
 
 val downloadBuildTools = tasks.register<DownloadFile>("downloadBuildTools") {
     url = "https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar"
@@ -244,6 +257,12 @@ testServers.forEach { server ->
                 serverJar(serverJarFile!!)
                 // Spigot doesn't understand Paper's -add-plugin option; copy the jar into plugins/ instead
                 if (server.platform == "spigot") legacyPluginLoading()
+            }
+        }
+        if (withPlaceholderApi) {
+            downloadPlugins {
+                // The release jar from Hangar (the one in the Maven repository is only for compiling against)
+                url("https://hangarcdn.papermc.io/plugins/HelpChat/PlaceholderAPI/versions/$placeholderApiVersion/PAPER/PlaceholderAPI-$placeholderApiVersion.jar")
             }
         }
         args("nogui")

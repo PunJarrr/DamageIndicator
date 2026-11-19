@@ -41,6 +41,16 @@ public class Config {
             problems.add("settings.number-format is '" + numberFormat + "', using int. Options: "
                     + String.join(", ", NUMBER_FORMATS));
         }
+        String decimalPlaces = "settings.decimal-places";
+        if (config.contains(decimalPlaces) && (!config.isInt(decimalPlaces) || config.getInt(decimalPlaces) < 0)) {
+            problems.add(decimalPlaces + " is '" + config.getString(decimalPlaces) + "', using "
+                    + (config.isInt(decimalPlaces) ? 0 : 1) + ". Use a whole number: 0 or more");
+        }
+        for (String flag : List.of("settings.hide-own-indicators", "settings.show-numbers-by-default")) {
+            if (config.contains(flag) && !config.isBoolean(flag)) {
+                problems.add(flag + " is '" + config.getString(flag) + "', using true. Options: true, false");
+            }
+        }
         return problems;
     }
 

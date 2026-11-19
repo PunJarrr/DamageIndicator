@@ -27,8 +27,10 @@ Ever wondered exactly how hard that sword hit? **DamageIndicator** shows the dam
 - **Damage** above the mob's head, like `-5❤ [15❤]`
 - **Healing** in another colour, like `+4❤ [19❤]`
 - **Your own text** with colours, gradients and formatting ([MiniMessage](https://docs.papermc.io/adventure/minimessage/format/)), and the placeholders `{damage}`, `{heal}`, `{current}`, `{max}`
-- **Adjustable:** how long the text stays, its size, where it appears, whole numbers or decimals
+- **Adjustable:** how long the text stays, its size, where it appears, whole numbers or decimals (and how many)
 - **Blacklist** for mobs that shouldn't show numbers (players by default)
+- **Players choose:** anyone can turn the numbers off or back on for themselves with `/di`, and it's remembered
+- **PlaceholderAPI** (optional): placeholders for scoreboards and menus, and other plugins' placeholders in the text
 - **Respects protection:** no numbers when WorldGuard or another plugin cancels the damage
 - **Paper, Purpur, Spigot and Folia**, Minecraft **1.19.4 – 26.3**, one jar for all of them
 - **Lightweight:** one short-lived text entity per hit, never saved with the world
@@ -64,7 +66,7 @@ Only the server needs it. Players don't install anything.
 
 ## ⚙️ Configuration
 
-- Change the text, how long it stays, its size and position, and the blacklist in `config.yml`.
+- Change the text, how long it stays, its size and position, the blacklist, and whether numbers start on or off for players in `config.yml`.
 - The text uses [MiniMessage](https://docs.papermc.io/adventure/minimessage/format/). Placeholders: `{damage}`, `{heal}`, `{current}`, `{max}`.
 - Command messages are in `translations/<language>.properties`.
 - Run `/di reload` after changing anything. Updating from an older version? Your `config.yml` is updated automatically, with your settings kept.
@@ -105,6 +107,9 @@ settings:
   # Options: int (whole numbers, rounded down, e.g. 5), double (decimals, e.g. 5.25)
   number-format: int
 
+  # The most decimals shown when number-format is double (e.g. 2 gives 5.25).
+  decimal-places: 1
+
   # Settings for the text display entity.
   text-display:
     # The scale of the text display (1.0 = default size).
@@ -128,9 +133,19 @@ settings:
   blacklisted-entities:
     - PLAYER
 
+  # When players aren't in blacklisted-entities, hide the indicators of damage and healing a player
+  # receives from that player's own screen, so you never see your own numbers (other players still do).
+  # Options: true, false
+  hide-own-indicators: true
+
+  # Whether players see the numbers before they've turned them on or off themselves with /di.
+  # Each player's own choice is saved, and is kept even if this changes.
+  # Options: true (players turn them off with /di), false (players turn them on with /di)
+  show-numbers-by-default: true
+
 # The version of this file. DamageIndicator uses it to update older config files automatically
 # (your settings are kept, and the old file is saved in the backup folder). Don't change it.
-config-version: 1.1.0
+config-version: 1.2.0
 ```
 </details>
 
@@ -138,7 +153,19 @@ config-version: 1.1.0
 
 | Command | Permission | Description |
 |---|---|---|
+| `/di` | `damageindicator.toggle` | Turn damage numbers off or back on, just for you. Remembered across logins (everyone by default). |
 | `/di reload` | `damageindicator.reload` | Reload the config and messages (operators by default). |
+
+## 🧩 PlaceholderAPI
+
+Optional. With [PlaceholderAPI](https://hangar.papermc.io/HelpChat/PlaceholderAPI) installed:
+
+| Placeholder | Shows |
+|---|---|
+| `%damageindicator_shown%` | `true` or `false`: whether the player sees the numbers |
+| `%damageindicator_status%` | `ON` or `OFF` in colour (change the words in `translations/<language>.properties`) |
+
+Other plugins' placeholders also work in the damage text (filled in for the player who hit the mob, like `%player_name%`) and in messages.
 
 <details>
 <summary>❓ FAQ</summary>
@@ -149,8 +176,11 @@ No. Old config files are updated automatically, your settings are kept, and a ba
 **Does it work on Spigot and Folia?**
 Yes, from 1.1.0. Paper and Purpur work too.
 
+**Can players turn the numbers off?**
+Yes, from 1.2.0. Each player types `/di` to turn them off or back on, and it's remembered across logins and restarts. To start with them off for everyone, set `show-numbers-by-default: false`. To stop players turning them off, take away `damageindicator.toggle`.
+
 **Can I see numbers when players get hurt?**
-Yes. Remove `PLAYER` from `blacklisted-entities` and run `/di reload`.
+Yes. Remove `PLAYER` from `blacklisted-entities` and run `/di reload`. Players don't see the numbers for their own damage and healing, unless you set `hide-own-indicators: false`.
 
 **Will it leave floating text behind if the server crashes?**
 No. From 1.1.0, the text is never saved with the world, so it can't get stuck.

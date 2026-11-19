@@ -24,7 +24,7 @@ public class BlacklistedEntities {
 
     /** Reads the blacklist from config.yml again (startup and /di reload). */
     public static void reload() {
-        List<String> configured = Config.get().getStringList("settings.blacklisted-entities");
+        List<String> configured = Config.get().getList("settings.blacklisted-entities", List.of()).stream().map(String::valueOf).toList();
         blacklisted = parse(ALWAYS_BLACKLISTED, configured);
         for (String name : unknown(configured)) {
             DamageIndicator.getInstance().getLogger().warning("settings.blacklisted-entities: '" + name

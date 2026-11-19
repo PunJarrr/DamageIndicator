@@ -30,6 +30,9 @@ settings:
   # Options: int (whole numbers, rounded down, e.g. 5), double (decimals, e.g. 5.25)
   number-format: int
 
+  # The most decimals shown when number-format is double (e.g. 2 gives 5.25).
+  decimal-places: 1
+
   # Settings for the text display entity.
   text-display:
     # The scale of the text display (1.0 = default size).
@@ -53,6 +56,16 @@ settings:
   blacklisted-entities:
     - PLAYER
 
+  # When players aren't in blacklisted-entities, hide the indicators of damage and healing a player
+  # receives from that player's own screen, so you never see your own numbers (other players still do).
+  # Options: true, false
+  hide-own-indicators: true
+
+  # Whether players see the numbers before they've turned them on or off themselves with /di.
+  # Each player's own choice is saved, and is kept even if this changes.
+  # Options: true (players turn them off with /di), false (players turn them on with /di)
+  show-numbers-by-default: true
+
 # The version of this file. DamageIndicator uses it to update older config files automatically
 # (your settings are kept, and the old file is saved in the backup folder). Don't change it.
-config-version: 1.1.0
+config-version: 1.2.0
